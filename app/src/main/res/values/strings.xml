@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AndroDNS</string>
+    <string-array name="query_classes">
+        <item>IN</item>
+        <item>CH</item>
+        <item>HS</item>
+    </string-array>
+</resources>
