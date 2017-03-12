@@ -26,12 +26,13 @@
             android:contentDescription="www.example.com" />
 
         <EditText
+            android:id="@+id/txtQname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:ems="10"
-            android:id="@+id/txtQname"
-            android:hint="www.example.com" />
+            android:hint="www.example.com"
+            android:inputType="text"
+            android:text="wgwh.ch" />
 
         <TextView
             android:text="Server"
@@ -40,12 +41,13 @@
             android:id="@+id/lblServer" />
 
         <EditText
+            android:id="@+id/txtServerName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:ems="10"
-            android:id="@+id/txtServerName"
-            android:hint="DNS server, leave empty for system resolver" />
+            android:hint="DNS server, leave empty for system resolver"
+            android:inputType="text"
+            android:text="8.8.8.8" />
 
         <TextView
             android:text="QTYPE"
@@ -102,11 +104,12 @@
                 android:id="@+id/cbCD" />
 
             <CheckBox
-                android:text="DO"
+                android:id="@+id/cbDO"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/cbDO"
-                android:layout_weight="0.06" />
+                android:layout_weight="0.06"
+                android:checked="true"
+                android:text="DO" />
 
             <CheckBox
                 android:text="TCP"
@@ -123,11 +126,74 @@
             android:id="@+id/button"
             android:onClick="queryButtonClicked" />
 
-        <EditText
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txtResult"
-            android:inputType="none" />
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cbaAA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="AA" />
+
+            <CheckBox
+                android:id="@+id/cbaTC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="TC" />
+
+            <CheckBox
+                android:id="@+id/cbaRD"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="RD" />
+
+            <CheckBox
+                android:id="@+id/cbaRA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="RA" />
+
+            <CheckBox
+                android:id="@+id/cbaAD"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="AD" />
+
+            <CheckBox
+                android:id="@+id/cbaCD"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="CD" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <EditText
+                android:id="@+id/txtResult"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:ellipsize="none"
+                android:inputType="none"
+                android:scrollHorizontally="true" />
+
+        </HorizontalScrollView>
+
 
     </LinearLayout>
 </RelativeLayout>

@@ -14,9 +14,11 @@ import android.widget.TextView;
 
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Flags;
+import org.xbill.DNS.Header;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.OPTRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
@@ -34,8 +36,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
-    private static final String TAG="AndroDNS";
+public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private static final String TAG = "AndroDNS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,16 +50,19 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     @Override
     protected void onStart() {
         super.onStart();
-        (((Spinner)findViewById(R.id.spinnerKnownTypes))).setOnItemSelectedListener(this);
+        (((Spinner) findViewById(R.id.spinnerKnownTypes))).setOnItemSelectedListener(this);
     }
 
-    public void doLookup(){
+    public void doLookup() {
         setAnsTextFromThread("query initializing...");
 
 
-        StringBuffer ansBuffer=new StringBuffer();
+        StringBuffer ansBuffer = new StringBuffer();
         try {
             String qname = gettxtQNAMEContent();
+            if (!qname.endsWith(".")) {
+                qname = qname + ".";
+            }
             Name current = Name.fromString(qname);
 
             int qtype = gettxtQTYPEContent();
@@ -65,66 +70,66 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             Resolver resolver = null;
 
             String resolverHostname = gettxtResolverContent().trim();
-            if(!resolverHostname.equals("")){
+            if (!resolverHostname.equals("")) {
                 resolver = new SimpleResolver(resolverHostname);
             } else {
                 resolver = new SimpleResolver(null);
             }
 
 
-            boolean DO_bit = ((CheckBox)findViewById(R.id.cbDO)).isChecked();
-            if (DO_bit){
-                resolver.setEDNS(0,0, Flags.DO,null);
-                Log.i(TAG, "doLookup: enabling EDNS");
+            boolean DO_bit = ((CheckBox) findViewById(R.id.cbDO)).isChecked();
+            if (DO_bit) {
+                resolver.setEDNS(0, 0, Flags.DO, null);
+
             }
 
 
-            resolver.setTCP(((CheckBox)findViewById(R.id.cbTCP)).isChecked());
+            resolver.setTCP(((CheckBox) findViewById(R.id.cbTCP)).isChecked());
 
             ansBuffer.append("Lookup qname=");
             ansBuffer.append(qname);
             ansBuffer.append(" qtype=");
             ansBuffer.append(qtype);
             ansBuffer.append("\n");
-            setAnsTextFromThread(ansBuffer.toString()+" (running)");
+            setAnsTextFromThread(ansBuffer.toString() + " (initializing)");
 
             int query_class = DClass.IN;
-            String selectedClass = (((Spinner)findViewById(R.id.spinnerCLASS))).getSelectedItem().toString();
-            if(selectedClass.equalsIgnoreCase("ch")){
+            String selectedClass = (((Spinner) findViewById(R.id.spinnerCLASS))).getSelectedItem().toString();
+            if (selectedClass.equalsIgnoreCase("ch")) {
                 query_class = DClass.CHAOS;
             }
-            if(selectedClass.equalsIgnoreCase("hs")){
+            if (selectedClass.equalsIgnoreCase("hs")) {
                 query_class = DClass.HESIOD;
             }
 
             Record question = Record.newRecord(current, qtype, query_class);
             Message query = Message.newQuery(question);
-            boolean RD_bit = ((CheckBox)findViewById(R.id.cbRD)).isChecked();
+            boolean RD_bit = ((CheckBox) findViewById(R.id.cbRD)).isChecked();
             //RD bit is set by default
             if (!RD_bit) {
                 query.getHeader().unsetFlag(Flags.RD);
             }
 
-            boolean CD_bit = ((CheckBox)findViewById(R.id.cbCD)).isChecked();
-            if(CD_bit){
+            boolean CD_bit = ((CheckBox) findViewById(R.id.cbCD)).isChecked();
+            if (CD_bit) {
                 query.getHeader().setFlag(Flags.CD);
             }
 
             Message response = null;
 
+
             response = resolver.send(query);
+            setAnsTextFromThread(ansBuffer.toString() + " (query sent)");
 
             int rcode = response.getHeader().getRcode();
 
             ansBuffer.append("RCODE=");
             ansBuffer.append(Rcode.string(rcode));
+
+
             ansBuffer.append("\n");
+            showAnswerFlags(response.getHeader());
 
-
-
-            if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
-                return;
-            }
 
             if (!query.getQuestion().equals(response.getQuestion())) {
                 ansBuffer.append("response question section does not match our question.\n");
@@ -143,7 +148,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
 
 
-
         } catch (Exception e) {
             ansBuffer.append(e.toString());
         }
@@ -151,39 +155,88 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         setAnsTextFromThread(ansBuffer.toString());
     }
 
-    public String rrSetsToString(RRset[] rrsets){
+
+    private void showAnswerFlags(Header header){
+        setAnsFlagFromThread(R.id.cbaAA, header.getFlag(Flags.AA));
+        setAnsFlagFromThread(R.id.cbaTC, header.getFlag(Flags.TC));
+        setAnsFlagFromThread(R.id.cbaRD, header.getFlag(Flags.RD));
+        setAnsFlagFromThread(R.id.cbaRA, header.getFlag(Flags.RA));
+        setAnsFlagFromThread(R.id.cbaAD, header.getFlag(Flags.AD));
+        setAnsFlagFromThread(R.id.cbaCD, header.getFlag(Flags.CD));
+        /*
+        String[] ansFlags = {"AA", "TC", "RD", "RA", "AD"};
+        for (String flag : ansFlags) {
+            int flagbit = Flags.value(flag);
+            if (response.getHeader().getFlag(flagbit)) {
+                ansBuffer.append(" " + flag);
+            }
+        }
+        */
+    }
+
+    public String rrSetsToString(RRset[] rrsets) {
         StringBuffer ansBuffer = new StringBuffer();
         Iterator it;
         int i;
 
         for (i = 0; i < rrsets.length; i++) {
-            it = rrsets[i].rrs();
-            while (it.hasNext())
-                ansBuffer.append(it.next().toString());
-            ansBuffer.append("\n");
+            RRset rrset = rrsets[i];
+            it = rrset.rrs();
+
+            while (it.hasNext()) {
+                Record r = (Record) it.next();
+                //Log.i(TAG, "rrsetstostring: type=" + r.getType());
+                ansBuffer.append(r.toString());
+                ansBuffer.append("\n");
+            }
+
+
+            //RRSIGs
+            final Iterator<Record> sigIter = rrset.sigs();
+            while (sigIter.hasNext()) {
+                final Record sigRec = sigIter.next();
+
+                ansBuffer.append(sigRec.toString());
+                ansBuffer.append("\n");
+            }
         }
-        return ansBuffer.toString();
+        //replace tabs
+        String ret = ansBuffer.toString().replace('\t',' ');
+        return ret;
     }
 
-    private void setAnsTextFromThread(final String content){
+    private void setAnsTextFromThread(final String content) {
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ((EditText)findViewById(R.id.txtResult)).setText(content);
+                ((EditText) findViewById(R.id.txtResult)).setText(content);
             }
         });
 
     }
-    public void queryButtonClicked(View view){
+
+    private void setAnsFlagFromThread(final int cbID, boolean checked) {
+        final boolean set_checked=checked;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((CheckBox) findViewById(cbID)).setChecked(  set_checked);
+            }
+        });
+
+    }
+
+    public void queryButtonClicked(View view) {
 
 
         Thread thread = new Thread(new Runnable() {
 
             @Override
             public void run() {
-                try  {
-                    doLookup();;
+                try {
+                    doLookup();
+                    ;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -191,30 +244,30 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         });
 
         thread.start();
-        ((EditText)findViewById(R.id.txtResult)).setText("query started...");
+        ((EditText) findViewById(R.id.txtResult)).setText("query started...");
 
     }
 
-    private void fillQTypes(){
-     //
-        List<String> spinnerArray =  new ArrayList<String>();
+    private void fillQTypes() {
+        //
+        List<String> spinnerArray = new ArrayList<String>();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this, android.R.layout.simple_spinner_item, spinnerArray);
-        for(int i =1;i<=32769;i++){
-           String textual= Type.string(i);
-            if (textual!=null && !textual.startsWith("TYPE")){
+        for (int i = 1; i <= 32769; i++) {
+            String textual = Type.string(i);
+            if (textual != null && !textual.startsWith("TYPE")) {
                 spinnerArray.add(textual);
             }
         }
 
-        (((Spinner)findViewById(R.id.spinnerKnownTypes))).setAdapter(adapter);
+        (((Spinner) findViewById(R.id.spinnerKnownTypes))).setAdapter(adapter);
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String selected=(String)(((Spinner)findViewById(R.id.spinnerKnownTypes))).getSelectedItem();
-        String selectedNumber = ""+Type.value(selected);
-        (((EditText)findViewById(R.id.txtQTYPE))).setText(selectedNumber);
+        String selected = (String) (((Spinner) findViewById(R.id.spinnerKnownTypes))).getSelectedItem();
+        String selectedNumber = "" + Type.value(selected);
+        (((EditText) findViewById(R.id.txtQTYPE))).setText(selectedNumber);
         //
     }
 
@@ -223,17 +276,19 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     }
 
-    public String gettxtResolverContent(){
+    public String gettxtResolverContent() {
         return getTextFieldContent(R.id.txtServerName);
     }
-    public String gettxtQNAMEContent(){
+
+    public String gettxtQNAMEContent() {
         return getTextFieldContent(R.id.txtQname);
     }
-    public int gettxtQTYPEContent(){
+
+    public int gettxtQTYPEContent() {
         return Integer.valueOf(getTextFieldContent(R.id.txtQTYPE)).intValue();
     }
 
-    private String getTextFieldContent(int txtID){
-        return (((EditText)findViewById(txtID))).getText().toString();
+    private String getTextFieldContent(int txtID) {
+        return (((EditText) findViewById(txtID))).getText().toString();
     }
 }
