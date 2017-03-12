@@ -54,7 +54,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     }
 
     public void doLookup() {
-        setAnsTextFromThread("query initializing...");
+        setStatusText("query initializing...");
 
 
         StringBuffer ansBuffer = new StringBuffer();
@@ -86,13 +86,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
             resolver.setTCP(((CheckBox) findViewById(R.id.cbTCP)).isChecked());
 
-            ansBuffer.append("Lookup qname=");
-            ansBuffer.append(qname);
-            ansBuffer.append(" qtype=");
-            ansBuffer.append(qtype);
-            ansBuffer.append("\n");
-            setAnsTextFromThread(ansBuffer.toString() + " (initializing)");
-
             int query_class = DClass.IN;
             String selectedClass = (((Spinner) findViewById(R.id.spinnerCLASS))).getSelectedItem().toString();
             if (selectedClass.equalsIgnoreCase("ch")) {
@@ -117,20 +110,17 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
             Message response = null;
 
-
+            long startTS=System.currentTimeMillis();
             response = resolver.send(query);
-            setAnsTextFromThread(ansBuffer.toString() + " (query sent)");
+            setStatusText("query sent");
+            long duration=System.currentTimeMillis()-startTS;
+            setStatusText(duration +" ms");
 
             int rcode = response.getHeader().getRcode();
-
-            ansBuffer.append("RCODE=");
-            ansBuffer.append(Rcode.string(rcode));
+            setRcodeText(Rcode.string(rcode));
 
 
-            ansBuffer.append("\n");
             showAnswerFlags(response.getHeader());
-
-
             if (!query.getQuestion().equals(response.getQuestion())) {
                 ansBuffer.append("response question section does not match our question.\n");
                 ansBuffer.append(response.getQuestion());
@@ -163,15 +153,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         setAnsFlagFromThread(R.id.cbaRA, header.getFlag(Flags.RA));
         setAnsFlagFromThread(R.id.cbaAD, header.getFlag(Flags.AD));
         setAnsFlagFromThread(R.id.cbaCD, header.getFlag(Flags.CD));
-        /*
-        String[] ansFlags = {"AA", "TC", "RD", "RA", "AD"};
-        for (String flag : ansFlags) {
-            int flagbit = Flags.value(flag);
-            if (response.getHeader().getFlag(flagbit)) {
-                ansBuffer.append(" " + flag);
-            }
-        }
-        */
     }
 
     public String rrSetsToString(RRset[] rrsets) {
@@ -213,8 +194,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 ((EditText) findViewById(R.id.txtResult)).setText(content);
             }
         });
-
     }
+
 
     private void setAnsFlagFromThread(final int cbID, boolean checked) {
         final boolean set_checked=checked;
@@ -244,7 +225,26 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         });
 
         thread.start();
-        ((EditText) findViewById(R.id.txtResult)).setText("query started...");
+
+
+    }
+    private void setStatusText(final String text){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                 ((TextView) findViewById(R.id.txtStatusText)).setText(text);
+            }
+        });
+
+    }
+
+    private void setRcodeText(final String text){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((TextView) findViewById(R.id.txtRcode)).setText(text);
+            }
+        });
 
     }
 
