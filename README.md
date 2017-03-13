@@ -1,0 +1,2 @@
+# androdns
+Android DNS Client
