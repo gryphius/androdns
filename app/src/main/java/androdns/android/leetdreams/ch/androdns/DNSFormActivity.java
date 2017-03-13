@@ -26,6 +26,7 @@ import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
+import org.xbill.DNS.ResolverConfig;
 import org.xbill.DNS.ResolverListener;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.SetResponse;
@@ -35,6 +36,11 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +63,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     }
 
     public void doLookup() {
-        setStatusText("query initializing...");
+        setStatusText("initializing");
 
 
         StringBuffer ansBuffer = new StringBuffer();
@@ -73,6 +79,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             Resolver resolver = null;
 
             String resolverHostname = gettxtResolverContent().trim();
+            setTextViewContent(R.id.txtServerIP, hostToAddr(resolverHostname));
             if (!resolverHostname.equals("")) {
                 resolver = new SimpleResolver(resolverHostname);
             } else {
@@ -85,7 +92,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 resolver.setEDNS(0, 0, Flags.DO, null);
 
             }
-
 
             resolver.setTCP(((CheckBox) findViewById(R.id.cbTCP)).isChecked());
 
@@ -100,6 +106,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
             Record question = Record.newRecord(current, qtype, query_class);
             Message query = Message.newQuery(question);
+
+
             boolean RD_bit = ((CheckBox) findViewById(R.id.cbRD)).isChecked();
             //RD bit is set by default
             if (!RD_bit) {
@@ -111,13 +119,24 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 query.getHeader().setFlag(Flags.CD);
             }
 
+            int querybytes = query.toWire().length;
+            setTextViewContent(R.id.txtQbytes,""+querybytes);
+
             Message response = null;
 
             long startTS=System.currentTimeMillis();
-            response = resolver.send(query);
             setStatusText("query sent");
+            response = resolver.send(query);
             long duration=System.currentTimeMillis()-startTS;
             setStatusText(duration +" ms");
+
+            setTextViewContent(R.id.txtAbytes,""+response.numBytes());
+
+
+            DecimalFormat df = new DecimalFormat("#.###");
+            df.setRoundingMode(RoundingMode.CEILING);
+            setTextViewContent(R.id.txtAmpfactor,df.format((float)response.numBytes()/(float)querybytes));
+
 
             int rcode = response.getHeader().getRcode();
             setRcodeText(Rcode.string(rcode));
@@ -148,6 +167,26 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         setAnsTextFromThread(ansBuffer.toString());
     }
 
+    public String hostToAddr(String hostname) {
+        if (hostname == null || hostname=="") {
+            hostname = ResolverConfig.getCurrentConfig().server();
+            if (hostname==null){
+                hostname="0";
+            }
+        }
+        InetAddress addr;
+        try {
+            if (hostname.equals("0"))
+                addr = InetAddress.getLocalHost();
+            else
+                addr = InetAddress.getByName(hostname);
+            InetSocketAddress address = new InetSocketAddress(addr, 53);
+            return address.getAddress().getHostAddress();
+        } catch (UnknownHostException e){
+
+        }
+        return "";
+    }
 
     private void showAnswerFlags(Header header){
         setAnsFlagFromThread(R.id.cbaAA, header.getFlag(Flags.AA));
@@ -253,24 +292,22 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
 
     }
-    private void setStatusText(final String text){
+
+    private void setTextViewContent(final int viewID, final String text){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                 ((TextView) findViewById(R.id.txtStatusText)).setText(text);
+                ((TextView) findViewById(viewID)).setText(text);
             }
         });
 
     }
+    private void setStatusText(final String text){
+        setTextViewContent(R.id.txtStatusText,text);
+    }
 
     private void setRcodeText(final String text){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ((TextView) findViewById(R.id.txtRcode)).setText(text);
-            }
-        });
-
+        setTextViewContent(R.id.txtRcode,text);
     }
 
     private void fillQTypes() {
