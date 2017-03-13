@@ -1,9 +1,12 @@
 package androdns.android.leetdreams.ch.androdns;
 
+import android.app.Activity;
+import android.graphics.Rect;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -208,8 +211,30 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     }
 
+
+    public static void hideKeyboard(Activity activity) {
+        if (isKeyboardVisible(activity)) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        }
+    }
+
+    public static boolean isKeyboardVisible(Activity activity) {
+        ///This method is based on the one described at http://stackoverflow.com/questions/4745988/how-do-i-detect-if-software-keyboard-is-visible-on-android-device
+        Rect r = new Rect();
+        View contentView = activity.findViewById(android.R.id.content);
+        contentView.getWindowVisibleDisplayFrame(r);
+        int screenHeight = contentView.getRootView().getHeight();
+
+        int keypadHeight = screenHeight - r.bottom;
+
+        return
+                (keypadHeight > screenHeight * 0.15);
+    }
+
     public void queryButtonClicked(View view) {
 
+        hideKeyboard(this);
 
         Thread thread = new Thread(new Runnable() {
 

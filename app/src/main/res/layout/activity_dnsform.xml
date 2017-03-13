@@ -49,12 +49,6 @@
             android:inputType="text"
             />
 
-        <TextView
-            android:text="QTYPE"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/lblQtype" />
-
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -115,14 +109,21 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/cbTCP"
            />
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="queryButtonClicked"
+                android:text="Query" />
+
         </LinearLayout>
 
-        <Button
-            android:text="Query"
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/button"
-            android:onClick="queryButtonClicked" />
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
 
         <LinearLayout
             android:layout_width="match_parent"
