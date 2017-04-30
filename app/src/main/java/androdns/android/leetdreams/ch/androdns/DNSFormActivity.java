@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.graphics.Rect;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -18,20 +16,15 @@ import android.widget.TextView;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
-import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
-import org.xbill.DNS.OPTRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.ResolverConfig;
-import org.xbill.DNS.ResolverListener;
 import org.xbill.DNS.Section;
-import org.xbill.DNS.SetResponse;
 import org.xbill.DNS.SimpleResolver;
-import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
@@ -47,14 +40,16 @@ import java.util.List;
 
 public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "AndroDNS";
-    private Question activeQuestion = null;
-
+    private Session activeSession = null;
+    private History history;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dnsform);
         fillQTypes();
 
+        history = new History(getApplicationContext());
+        history.load();
     }
 
     @Override
@@ -63,39 +58,102 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         (((Spinner) findViewById(R.id.spinnerKnownTypes))).setOnItemSelectedListener(this);
     }
 
+    /**
+     * update the the lower gui section with the Values from an AnswerScreenState
+     * @param state
+     */
+    public void updateScreenState(AnswerScreenState state){
+        setTextViewContent(R.id.txtServerIP, state.server);
+        setTextViewContent(R.id.txtQbytes, ""+state.qsize);
+        setTextViewContent(R.id.txtAbytes,""+state.asize);
 
-    public void doLookup(Question question){
-        activeQuestion = question;
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.CEILING);
+        setTextViewContent(R.id.txtAmpfactor,df.format(state.ampFactor));
+
+
+        setAnsFlagFromThread(R.id.cbaAA, state.flag_AA);
+        setAnsFlagFromThread(R.id.cbaTC, state.flag_TC);
+        setAnsFlagFromThread(R.id.cbaRD, state.flag_RD);
+        setAnsFlagFromThread(R.id.cbaRA, state.flag_RA);
+        setAnsFlagFromThread(R.id.cbaAD, state.flag_AD);
+        setAnsFlagFromThread(R.id.cbaCD, state.flag_CD);
+
+        setAnsTextFromThread(state.answerText);
+
+        if (state.rcode>-1) {
+            setRcodeText(Rcode.string(state.rcode));
+        } else {
+            setRcodeText("");
+        }
+    }
+
+    /**
+     * set screen state from a stored session
+     * @param s
+     */
+    public void setScreenState(Session session){
+        activeSession = session;
+
+        //TODO: set question, server, question flags
+
+
+        if (session.answer!=null){
+            updateScreenState(session.answer);
+        }
+    }
+
+    /**
+     * update answer screen state if the session this comes from is still the active one*
+     **/
+    public void updateStreenStateIfCurrent(Session session, AnswerScreenState state){
+        if (session == activeSession){
+            updateScreenState(state);
+        }
+    }
+
+    /**
+     * perform the lookup, store the answer in an answerscreenstate and update the screen when done
+     * @param session
+     */
+    public void doLookup(Session session){
+        activeSession = session;
+        session.runtimestamp = System.currentTimeMillis();
+        AnswerScreenState answerState = new AnswerScreenState();
+
+        String answerOutput="";
 
         try {
-            String qname = question.qname;
+
+            // Set up the query
+            String qname = session.qname;
             if (!qname.endsWith(".")) {
                 qname = qname + ".";
             }
             Name current = Name.fromString(qname);
-            int qtype = question.qtype;
+            int qtype = session.qtype;
 
             StringBuffer ansBuffer = new StringBuffer();
 
             Resolver resolver = null;
 
-            String resolverHostname = question.server;
-            setTextViewContent(R.id.txtServerIP, hostToAddr(resolverHostname));
+            String resolverHostname = session.server;
+            answerState.server = hostToAddr(resolverHostname);
+
             if (!resolverHostname.equals("")) {
                 resolver = new SimpleResolver(resolverHostname);
             } else {
                 resolver = new SimpleResolver(null);
             }
 
-            if (question.flag_DO) {
+            if (session.flag_DO) {
                 resolver.setEDNS(0, 0, Flags.DO, null);
-
             }
 
-            resolver.setTCP(question.TCP);
+            resolver.setTCP(session.TCP);
 
             int query_class = DClass.IN;
-            String selectedClass = question.qclass;
+            String selectedClass = session.qclass;
             if (selectedClass.equalsIgnoreCase("ch")) {
                 query_class = DClass.CHAOS;
             }
@@ -108,36 +166,42 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
 
             //RD bit is set by default
-            if (!question.flag_RD) {
+            if (!session.flag_RD) {
                 query.getHeader().unsetFlag(Flags.RD);
             }
 
-            if (question.flag_CD) {
+            if (session.flag_CD) {
                 query.getHeader().setFlag(Flags.CD);
             }
 
             int querybytes = query.toWire().length;
-            setTextViewContent(R.id.txtQbytes,""+querybytes);
+            answerState.qsize = querybytes;
 
+
+            // Query ready, send it
             Message response = null;
-
             long startTS=System.currentTimeMillis();
             setStatusText("query sent");
             response = resolver.send(query);
 
-            if (activeQuestion!=question){
+            if (activeSession !=session){
                 return; // this query has been aborted/overwritten by a new one
             }
 
             long duration=System.currentTimeMillis()-startTS;
-            setStatusText(duration +" ms");
-            setTextViewContent(R.id.txtAbytes,""+response.numBytes());
-            DecimalFormat df = new DecimalFormat("#.###");
-            df.setRoundingMode(RoundingMode.CEILING);
-            setTextViewContent(R.id.txtAmpfactor,df.format((float)response.numBytes()/(float)querybytes));
+            session.duration = duration;
+            answerState.status = duration +" ms";
+            answerState.asize = response.numBytes();
+
+
+            answerState.ampFactor = ((float)response.numBytes()/(float)querybytes);
+
             int rcode = response.getHeader().getRcode();
-            setRcodeText(Rcode.string(rcode));
-            showAnswerFlags(response.getHeader());
+            answerState.rcode = rcode;
+
+
+            setAnswerFlagsToState(response.getHeader(), answerState);
+
             if (!query.getQuestion().equals(response.getQuestion())) {
                 ansBuffer.append("response question section does not match our question.\n");
                 ansBuffer.append(response.getQuestion());
@@ -149,38 +213,40 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.AUTHORITY)));
             ansBuffer.append("ADDITIONAL SECTION:\n");
             ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
-            setAnsTextFromThread(ansBuffer.toString());
 
+            answerOutput = ansBuffer.toString();
         } catch (TextParseException e) {
-            if (activeQuestion == question) {
-                setAnsTextFromThread("Invalid qname");
-                setStatusText("error");
+            if (activeSession == session) {
+                answerOutput="Invalid qname";
+                answerState.status = "INVALID";
             }
-            return;
+
         } catch (UnknownHostException e){
-            if (activeQuestion == question) {
-                setAnsTextFromThread("Host not found: " + e.toString());
-                setStatusText("error");
+            if (activeSession == session) {
+                answerOutput="Host not found: " + e.toString();
+                answerState.status = "ERROR";
             }
-            return;
+
         } catch (java.net.SocketTimeoutException e){
-            if (activeQuestion == question) {
-                setAnsTextFromThread("Query timed out");
-                setStatusText("TIMEOUT");
+            if (activeSession == session) {
+                answerOutput="Query timed out";
+                answerState.status = "TIMEOUT";
             }
-            return;
         } catch (IOException e){
-            if (activeQuestion == question) {
-                setStatusText("error");
-                setAnsTextFromThread("I/O Error: " + e.toString());
+            if (activeSession == session) {
+                answerOutput="I/O Error: " + e.toString();
+                answerState.status = "ERROR";
             }
-            return;
         }
+        session.answer = answerState;
+        answerState.answerText = answerOutput;
+        history.addEntry(session);
+        updateStreenStateIfCurrent(session,answerState);
     }
 
     public void doLookup() {
         setStatusText("initializing");
-        Question thisQuestion = new Question();
+        Session thisQuestion = new Session();
 
         //build the question object
         String qname = gettxtQNAMEContent();
@@ -216,13 +282,13 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         return "";
     }
 
-    private void showAnswerFlags(Header header){
-        setAnsFlagFromThread(R.id.cbaAA, header.getFlag(Flags.AA));
-        setAnsFlagFromThread(R.id.cbaTC, header.getFlag(Flags.TC));
-        setAnsFlagFromThread(R.id.cbaRD, header.getFlag(Flags.RD));
-        setAnsFlagFromThread(R.id.cbaRA, header.getFlag(Flags.RA));
-        setAnsFlagFromThread(R.id.cbaAD, header.getFlag(Flags.AD));
-        setAnsFlagFromThread(R.id.cbaCD, header.getFlag(Flags.CD));
+    private void setAnswerFlagsToState(Header header, AnswerScreenState state){
+        state.flag_AA =  header.getFlag(Flags.AA);
+        state.flag_AD = header.getFlag(Flags.AD);
+        state.flag_TC = header.getFlag(Flags.TC);
+        state.flag_RD = header.getFlag(Flags.RD);
+        state.flag_RA = header.getFlag(Flags.RA);
+        state.flag_CD = header.getFlag(Flags.CD);
     }
 
     public String rrSetsToString(RRset[] rrsets) {
@@ -316,8 +382,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         });
 
         thread.start();
-
-
     }
 
     private void setTextViewContent(final int viewID, final String text){
@@ -357,7 +421,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         String selected = (String) (((Spinner) findViewById(R.id.spinnerKnownTypes))).getSelectedItem();
         String selectedNumber = "" + Type.value(selected);
         (((EditText) findViewById(R.id.txtQTYPE))).setText(selectedNumber);
-        //
     }
 
     @Override
