@@ -2,6 +2,7 @@ package androdns.android.leetdreams.ch.androdns;
 
 import android.content.Context;
 import android.os.Environment;
+import android.support.v4.content.res.TypedArrayUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Vector;
 
 /**
@@ -19,7 +22,7 @@ public class History {
 
 
 
-    private Vector<Session> historyvector = new Vector<Session>();
+    private ArrayList<Session> historyvector = new ArrayList<Session>();
     private static final String historyFile = "history.dat";
     private Context context =null;
     public History(Context context){
@@ -42,7 +45,7 @@ public class History {
         ObjectInputStream in;
         try {
             in = new ObjectInputStream(context.openFileInput(historyFile));
-            historyvector=(Vector<Session>) in.readObject();
+            historyvector=(ArrayList<Session>) in.readObject();
             in.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,8 +57,17 @@ public class History {
         save();
     }
 
-    public Vector<Session> getHistory(){
-        return historyvector;
+    public ArrayList<Session> getHistory(){
+        Session[] history = historyvector.toArray(new Session[historyvector.size()]);
+
+        ArrayList<Session> copy = new ArrayList<>(historyvector);
+
+        Collections.reverse(copy);
+        return copy;
+    }
+
+    public Session getSessionAt(int position){
+        return getHistory().get(position);
     }
 
 

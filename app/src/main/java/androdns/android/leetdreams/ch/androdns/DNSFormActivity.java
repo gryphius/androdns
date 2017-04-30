@@ -1,9 +1,15 @@
 package androdns.android.leetdreams.ch.androdns;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Rect;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -13,9 +19,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
+import org.xbill.DNS.InvalidTypeException;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.RRset;
@@ -48,6 +56,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         setContentView(R.layout.activity_dnsform);
         fillQTypes();
 
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
+
         history = new History(getApplicationContext());
         history.load();
     }
@@ -58,48 +69,92 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         (((Spinner) findViewById(R.id.spinnerKnownTypes))).setOnItemSelectedListener(this);
     }
 
-    /**
-     * update the the lower gui section with the Values from an AnswerScreenState
-     * @param state
-     */
-    public void updateScreenState(AnswerScreenState state){
-        setTextViewContent(R.id.txtServerIP, state.server);
-        setTextViewContent(R.id.txtQbytes, ""+state.qsize);
-        setTextViewContent(R.id.txtAbytes,""+state.asize);
-
-        DecimalFormat df = new DecimalFormat("#.###");
-        df.setRoundingMode(RoundingMode.CEILING);
-        setTextViewContent(R.id.txtAmpfactor,df.format(state.ampFactor));
-
-
-        setAnsFlagFromThread(R.id.cbaAA, state.flag_AA);
-        setAnsFlagFromThread(R.id.cbaTC, state.flag_TC);
-        setAnsFlagFromThread(R.id.cbaRD, state.flag_RD);
-        setAnsFlagFromThread(R.id.cbaRA, state.flag_RA);
-        setAnsFlagFromThread(R.id.cbaAD, state.flag_AD);
-        setAnsFlagFromThread(R.id.cbaCD, state.flag_CD);
-
-        setAnsTextFromThread(state.answerText);
-
-        if (state.rcode>-1) {
-            setRcodeText(Rcode.string(state.rcode));
-        } else {
-            setRcodeText("");
-        }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.actionbar, menu);
+        return true;
     }
 
     /**
-     * set screen state from a stored session
-     * @param s
+     * update the the lower gui section with the Values from an AnswerScreenState
+     * @param state
+     * history: if true, do not update the title
      */
-    public void setScreenState(Session session){
+    public void updateScreenState(final AnswerScreenState state, final boolean history){
+
+
+
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.CEILING);
+        final String ampFactor = df.format(state.ampFactor);
+
+        Runnable guiUpdate = new Runnable() {
+            @Override
+            public void run() {
+                if (!history){
+                    setTitle("");
+                }
+
+                ((TextView) findViewById(R.id.txtStatusText)).setText(state.status);
+                ((TextView) findViewById(R.id.txtServerIP)).setText(state.server);
+                ((TextView) findViewById(R.id.txtQbytes)).setText(""+state.qsize);
+                ((TextView) findViewById(R.id.txtAbytes)).setText(""+state.asize);
+                ((TextView) findViewById(R.id.txtAmpfactor)).setText(ampFactor);
+                ((EditText) findViewById(R.id.txtResult)).setText(state.answerText);
+                if (state.rcode>-1) {
+                    ((TextView) findViewById(R.id.txtRcode)).setText(Rcode.string(state.rcode));
+                } else {
+                    ((TextView) findViewById(R.id.txtRcode)).setText("");
+
+                }
+
+
+                ((CheckBox) findViewById(R.id.cbaAA)).setChecked(  state.flag_AA);
+                ((CheckBox) findViewById(R.id.cbaTC)).setChecked(  state.flag_TC);
+                ((CheckBox) findViewById(R.id.cbaRD)).setChecked(  state.flag_RD);
+                ((CheckBox) findViewById(R.id.cbaRA)).setChecked(  state.flag_RA);
+                ((CheckBox) findViewById(R.id.cbaAD)).setChecked(  state.flag_AD);
+                ((CheckBox) findViewById(R.id.cbaCD)).setChecked(  state.flag_CD);
+
+
+            }
+        };
+
+        runOnUiThread(guiUpdate);
+    }
+
+
+    /**
+     * set the screen state from a history entry
+     * @param session
+     */
+    public void setScreenState(final Session session){
         activeSession = session;
 
-        //TODO: set question, server, question flags
+        Runnable guiUpdate = new Runnable() {
+            @Override
+            public void run() {
+                setTitle(HistoryAdapter.getDate(session.runtimestamp,"yyyy-MM-dd hh:mm:ss"));
+                ((EditText) findViewById(R.id.txtQname)).setText(session.qname);
+                ((EditText) findViewById(R.id.txtServerName)).setText(session.server);
+                ((EditText) findViewById(R.id.txtQTYPE)).setText(""+session.qtype);
+                Spinner qtypespinner = (Spinner) findViewById(R.id.spinnerKnownTypes);
+                try {
+                    qtypespinner.setSelection(getIndex(qtypespinner, Type.string(session.qtype)));
+                } catch (Exception e){} //invalid type
 
+                ((CheckBox) findViewById(R.id.cbTCP)).setChecked(session.TCP);
+                ((CheckBox) findViewById(R.id.cbCD)).setChecked(session.flag_CD);
+                ((CheckBox) findViewById(R.id.cbRD)).setChecked(session.flag_RD);
+                ((CheckBox) findViewById(R.id.cbDO)).setChecked(session.flag_DO);
+            }
+        };
+
+        runOnUiThread(guiUpdate);
 
         if (session.answer!=null){
-            updateScreenState(session.answer);
+            updateScreenState(session.answer,true);
         }
     }
 
@@ -108,7 +163,41 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
      **/
     public void updateStreenStateIfCurrent(Session session, AnswerScreenState state){
         if (session == activeSession){
-            updateScreenState(state);
+            updateScreenState(state,false);
+        }
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_history:
+                Intent intent = new Intent(this, HistoryActivity.class);
+
+                //intent.putExtra("parent", this);
+
+                startActivityForResult(intent,1);
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (1) : {
+                if (resultCode == Activity.RESULT_OK) {
+                    int returnValue = data.getIntExtra("entry",0);
+                    setScreenState(history.getSessionAt(returnValue));
+                }
+                break;
+            }
         }
     }
 
@@ -237,6 +326,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 answerOutput="I/O Error: " + e.toString();
                 answerState.status = "ERROR";
             }
+        }  catch (InvalidTypeException e){
+            answerOutput="Invalid type";
+            answerState.status = "INVALID";
         }
         session.answer = answerState;
         answerState.answerText = answerOutput;
@@ -442,5 +534,19 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     private String getTextFieldContent(int txtID) {
         return (((EditText) findViewById(txtID))).getText().toString();
+    }
+
+    //private method of your class
+    private int getIndex(Spinner spinner, String myString)
+    {
+        int index = 0;
+
+        for (int i=0;i<spinner.getCount();i++){
+            if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(myString)){
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 }

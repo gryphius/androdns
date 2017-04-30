@@ -5,8 +5,8 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "androdns.android.leetdreams.ch.androdns"
-        minSdkVersion 15
-        targetSdkVersion 25
+        minSdkVersion 24
+        targetSdkVersion 24
         versionCode 3
         versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -21,8 +21,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.2.0'
 
     // https://mvnrepository.com/artifact/dnsjava/dnsjava
     compile group: 'dnsjava', name: 'dnsjava', version: '2.1.1'
+    compile 'com.android.support:design:25.3.1'
 }
