@@ -1,7 +1,4 @@
 package androdns.android.leetdreams.ch.androdns;
-
-
-
 import java.io.Serializable;
 
 /**

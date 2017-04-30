@@ -124,7 +124,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         runOnUiThread(guiUpdate);
     }
 
-
     /**
      * set the screen state from a history entry
      * @param session
@@ -167,15 +166,11 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_history:
                 Intent intent = new Intent(this, HistoryActivity.class);
-
-                //intent.putExtra("parent", this);
-
                 startActivityForResult(intent,1);
                 return true;
 
@@ -209,11 +204,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         activeSession = session;
         session.runtimestamp = System.currentTimeMillis();
         AnswerScreenState answerState = new AnswerScreenState();
-
         String answerOutput="";
 
         try {
-
             // Set up the query
             String qname = session.qname;
             if (!qname.endsWith(".")) {
@@ -434,7 +427,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         });
 
     }
-
 
     public static void hideKeyboard(Activity activity) {
         if (isKeyboardVisible(activity)) {

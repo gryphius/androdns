@@ -73,7 +73,6 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
         return rowView;
     }
 
-
     /**
      * Return date in specified format.
      * @param milliSeconds Date in milliseconds
