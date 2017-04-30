@@ -21,18 +21,5 @@ public class Session implements Serializable {
         created = System.currentTimeMillis();
     }
 
-    public Session clone(){
-        Session clone = new Session();
-        clone.qname = qname;
-        clone.server = server;
-        clone.qtype = qtype;
-        clone.qclass = qclass;
-        clone.flag_RD = flag_RD;
-        clone.flag_CD = flag_CD;
-        clone.flag_DO = flag_DO;
-        clone.TCP = TCP;
-        return clone;
-    }
-
     public long duration;
 }
