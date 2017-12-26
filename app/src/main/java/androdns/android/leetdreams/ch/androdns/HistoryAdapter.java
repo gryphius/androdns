@@ -56,6 +56,12 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
         ((TextView) rowView.findViewById(R.id.history_qtype)).setText(type);
 
         StringBuffer flagsBuffer = new StringBuffer();
+        // add qclass to flags view if not IN
+        if (!session.qclass.equalsIgnoreCase("IN")){
+            flagsBuffer.append(session.qclass);
+            flagsBuffer.append(" ");
+        }
+
         if (session.flag_RD){
             flagsBuffer.append("RD ");
         }
