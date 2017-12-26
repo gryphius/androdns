@@ -143,6 +143,11 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                     qtypespinner.setSelection(getIndex(qtypespinner, Type.string(session.qtype)));
                 } catch (Exception e){} //invalid type
 
+                Spinner classSpinner = ( Spinner)findViewById(R.id.spinnerCLASS);
+                try{
+                    classSpinner.setSelection(getIndex(classSpinner,session.qclass));
+                }catch (Exception e){} //invalid class
+
                 ((CheckBox) findViewById(R.id.cbTCP)).setChecked(session.TCP);
                 ((CheckBox) findViewById(R.id.cbCD)).setChecked(session.flag_CD);
                 ((CheckBox) findViewById(R.id.cbRD)).setChecked(session.flag_RD);
