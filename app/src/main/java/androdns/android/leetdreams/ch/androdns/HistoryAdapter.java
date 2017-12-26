@@ -1,14 +1,14 @@
 package androdns.android.leetdreams.ch.androdns;
 
 import android.content.Context;
-import android.icu.text.SimpleDateFormat;
-import android.icu.util.Calendar;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import org.xbill.DNS.InvalidTypeException;
 import org.xbill.DNS.Type;
 
