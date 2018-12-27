@@ -73,7 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="blank for system resolver"
+            android:hint="blank: auto-detect"
             android:inputType="text"
             android:layout_weight="1"
             /><Spinner
