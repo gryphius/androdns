@@ -545,14 +545,13 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         if (parent==spProtocol){
 
             String proto = (String) spProtocol.getSelectedItem();
-            boolean  alwaysTCP=false;
+
             CheckBox tcpCheckbox = (CheckBox) findViewById(R.id.cbTCP);
             if (!proto.equalsIgnoreCase("DNS")){ //DoH and DoT are always TCP
-                alwaysTCP=true;
-                tcpCheckbox.setChecked(true);
+                tcpCheckbox.setEnabled(false);
+            } else {
+                tcpCheckbox.setEnabled(true);
             }
-
-            tcpCheckbox.setEnabled(!alwaysTCP);
         }
 
 
