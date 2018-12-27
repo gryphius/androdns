@@ -51,6 +51,7 @@ import javax.net.ssl.X509TrustManager;
 
 
 public class SimpleDoTResolver implements Resolver {
+    protected int CONNECT_READ_TIMEOUT=5000;
 
     /** The default port to send queries to */
     public static final int DEFAULT_DOT_PORT = 853;
@@ -338,9 +339,13 @@ public class SimpleDoTResolver implements Resolver {
 
             SSLContext context = SSLContext.getInstance("TLSv1.2");
             context.init(null, trustAllCerts, null);
-            dnsSocket = context.getSocketFactory()
-                    .createSocket(address.getAddress(), address.getPort());
 
+            dnsSocket = context.getSocketFactory()
+                    .createSocket();
+
+
+            dnsSocket.connect(address, CONNECT_READ_TIMEOUT);
+            dnsSocket.setSoTimeout(CONNECT_READ_TIMEOUT);
             DataOutputStream dos = new DataOutputStream(dnsSocket.getOutputStream());
             byte[] packet = outPacket.getData();
             dos.writeShort(packet.length);

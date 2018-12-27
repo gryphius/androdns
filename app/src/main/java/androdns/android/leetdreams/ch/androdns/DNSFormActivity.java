@@ -361,6 +361,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
+    public void clearAnswer(){
+        updateScreenState(new AnswerScreenState(), false);
+    }
+
 
     public void doLookup() {
         setStatusText("initializing");
@@ -483,7 +487,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     }
 
     public void queryButtonClicked(View view) {
-
+        clearAnswer();
         hideKeyboard(this);
 
         Thread thread = new Thread(new Runnable() {
@@ -553,8 +557,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 tcpCheckbox.setEnabled(true);
             }
         }
-
-
 
         // set qtype number from spinner
         Spinner spKnownTypes = (Spinner) findViewById(R.id.spinnerKnownTypes);

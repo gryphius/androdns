@@ -60,6 +60,8 @@ public class SimpleDoHResolver extends SimpleDoTResolver {
         try {
             URL url = new URL(this.url);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(CONNECT_READ_TIMEOUT);
+            urlConnection.setReadTimeout(CONNECT_READ_TIMEOUT);
             urlConnection.setRequestProperty("accept", "application/dns-message");
             urlConnection.setRequestProperty("content-type", "application/dns-message");
 
