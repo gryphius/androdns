@@ -240,8 +240,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             if (session.protocol.equalsIgnoreCase("DoT")){
                 resolver = new SimpleDoTResolver(hostnameArg);
             } else if(session.protocol.equalsIgnoreCase("DoH")){
-                //not yet implemented
-                    return;
+                resolver = new SimpleDoHResolver(hostnameArg);
             } else {
                 resolver = new SimpleResolver(hostnameArg);
             }

@@ -53,12 +53,12 @@ import javax.net.ssl.X509TrustManager;
 public class SimpleDoTResolver implements Resolver {
 
     /** The default port to send queries to */
-    public static final int DEFAULT_PORT = 853;
+    public static final int DEFAULT_DOT_PORT = 853;
 
     /** The default EDNS payload size */
     public static final int DEFAULT_EDNS_PAYLOADSIZE = 1280;
 
-    private InetSocketAddress address;
+    protected InetSocketAddress address;
     private InetSocketAddress localAddress;
     private boolean useTCP, ignoreTruncation;
     private OPTRecord queryOPT;
@@ -86,7 +86,7 @@ public class SimpleDoTResolver implements Resolver {
             addr = InetAddress.getLocalHost();
         else
             addr = InetAddress.getByName(hostname);
-        address = new InetSocketAddress(addr, DEFAULT_PORT);
+        address = new InetSocketAddress(addr, DEFAULT_DOT_PORT);
     }
 
     /**
@@ -273,55 +273,13 @@ public class SimpleDoTResolver implements Resolver {
         if (tsig != null)
             tsig.apply(query, null);
 
-        byte [] out = query.toWire(Message.MAXLENGTH);
+        //
         int udpSize = maxUDPSize(query);
-        boolean tcp = false;
+
+
+
         long endTime = System.currentTimeMillis() + timeoutValue;
-        do {
-            byte [] in;
-
-
-
-            Log.d("dns", "Trying to perform DNS-over-TLS lookup via " + getAddress().toString());
-            Socket dnsSocket;
-
-            DatagramPacket outPacket = new DatagramPacket(out, out.length);
-            try {
-
-                TrustManager[] trustAllCerts = new TrustManager[] {
-                        new X509TrustManager() {
-                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                                return new X509Certificate[0];
-                            }
-                            public void checkClientTrusted(
-                                    java.security.cert.X509Certificate[] certs, String authType) {
-                            }
-                            public void checkServerTrusted(
-                                    java.security.cert.X509Certificate[] certs, String authType) {
-                            }
-                        }
-                };
-
-                SSLContext context = SSLContext.getInstance("TLSv1.2");
-                context.init(null, trustAllCerts, null);
-                dnsSocket = context.getSocketFactory()
-                        .createSocket(address.getAddress(), address.getPort());
-
-                DataOutputStream dos = new DataOutputStream(dnsSocket.getOutputStream());
-                byte[] packet = outPacket.getData();
-                dos.writeShort(packet.length);
-                dos.write(packet);
-                dos.flush();
-
-                DataInputStream stream = new DataInputStream(dnsSocket.getInputStream());
-                int length = stream.readUnsignedShort();
-                in = new byte[length];
-                stream.read(in);
-                dnsSocket.close();
-            } catch(Exception e){
-                e.printStackTrace();
-                throw new IOException("could not set up DoT connection: "+e.getMessage());
-            }
+        byte[] in = sendAndReceive(query);
 
 		/*
 		 * Check that the response is long enough.
@@ -341,25 +299,64 @@ public class SimpleDoTResolver implements Resolver {
             if (id != qid) {
                 String error = "invalid message id: expected " + qid +
                         "; got id " + id;
-                if (tcp) {
-                    throw new WireParseException(error);
-                } else {
+
                     if (Options.check("verbose")) {
                         System.err.println(error);
+
                     }
-                    continue;
-                }
+                throw new IOException(error);
             }
             Message response = parseMessage(in);
             verifyTSIG(query, response, in, tsig);
-            if (!tcp && !ignoreTruncation &&
-                    response.getHeader().getFlag(Flags.TC))
-            {
-                tcp = true;
-                continue;
-            }
             return response;
-        } while (true);
+
+    }
+
+    protected byte[] sendAndReceive(Message query) throws IOException{
+        byte [] out = query.toWire(Message.MAXLENGTH);
+        byte [] in;
+
+        Log.d("dns", "Trying to perform DNS-over-TLS lookup via " + getAddress().toString());
+        Socket dnsSocket;
+
+        DatagramPacket outPacket = new DatagramPacket(out, out.length);
+        try {
+
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+
+            SSLContext context = SSLContext.getInstance("TLSv1.2");
+            context.init(null, trustAllCerts, null);
+            dnsSocket = context.getSocketFactory()
+                    .createSocket(address.getAddress(), address.getPort());
+
+            DataOutputStream dos = new DataOutputStream(dnsSocket.getOutputStream());
+            byte[] packet = outPacket.getData();
+            dos.writeShort(packet.length);
+            dos.write(packet);
+            dos.flush();
+
+            DataInputStream stream = new DataInputStream(dnsSocket.getInputStream());
+            int length = stream.readUnsignedShort();
+            in = new byte[length];
+            stream.read(in);
+            dnsSocket.close();
+        } catch(Exception e){
+            e.printStackTrace();
+            throw new IOException("could not set up DoT connection: "+e.getMessage());
+        }
+        return in;
     }
 
     /**
