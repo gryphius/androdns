@@ -56,6 +56,13 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
         ((TextView) rowView.findViewById(R.id.history_qtype)).setText(type);
 
         StringBuffer flagsBuffer = new StringBuffer();
+
+        // add proto to flags view if not DNS
+        if (!session.protocol.equalsIgnoreCase("DNS")){
+            flagsBuffer.append(session.protocol);
+            flagsBuffer.append(" ");
+        }
+
         // add qclass to flags view if not IN
         if (!session.qclass.equalsIgnoreCase("IN")){
             flagsBuffer.append(session.qclass);
@@ -71,7 +78,7 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
         if(session.flag_DO){
             flagsBuffer.append("DO ");
         }
-        if(session.TCP){
+        if(session.TCP && session.protocol.equalsIgnoreCase("DNS")){
             flagsBuffer.append("TCP ");
         }
 

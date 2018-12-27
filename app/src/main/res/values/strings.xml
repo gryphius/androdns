@@ -5,6 +5,11 @@
         <item>CH</item>
         <item>HS</item>
     </string-array>
+    <string-array name="protocols">
+        <item>DNS</item>
+        <item>DoT</item>
+        <item>DoH</item>
+    </string-array>
     <string name="title_activity_history">HistoryActivity</string>
     <string name="history">History</string>
 </resources>

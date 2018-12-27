@@ -6,6 +6,7 @@ public class Session implements Serializable {
     public String server;
     public int qtype;
     public String qclass; //ch, in, hs
+    public String protocol; // DNS, DoT, DoH
 
     public boolean flag_RD;
     public boolean flag_CD;

@@ -148,6 +148,11 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                     classSpinner.setSelection(getIndex(classSpinner,session.qclass));
                 }catch (Exception e){} //invalid class
 
+                Spinner protoSpinner = ( Spinner)findViewById(R.id.spinnerProto);
+                try{
+                    protoSpinner.setSelection(getIndex(protoSpinner,session.protocol));
+                }catch (Exception e){} //invalid class
+
                 ((CheckBox) findViewById(R.id.cbTCP)).setChecked(session.TCP);
                 ((CheckBox) findViewById(R.id.cbCD)).setChecked(session.flag_CD);
                 ((CheckBox) findViewById(R.id.cbRD)).setChecked(session.flag_RD);
@@ -227,11 +232,21 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             String resolverHostname = session.server;
             answerState.server = hostToAddr(resolverHostname);
 
-            if (!resolverHostname.equals("")) {
-                resolver = new SimpleResolver(resolverHostname);
-            } else {
-                resolver = new SimpleResolver(null);
+            String hostnameArg = resolverHostname;
+            if (hostnameArg.trim().equals("")){
+                hostnameArg=null;
             }
+
+            if (session.protocol.equalsIgnoreCase("DoT")){
+                resolver = new SimpleDoTResolver(hostnameArg);
+            } else if(session.protocol.equalsIgnoreCase("DoH")){
+                //not yet implemented
+                    return;
+            } else {
+                resolver = new SimpleResolver(hostnameArg);
+            }
+
+
 
             if (session.flag_DO) {
                 resolver.setEDNS(0, 0, Flags.DO, null);
@@ -334,6 +349,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         updateStreenStateIfCurrent(session,answerState);
     }
 
+
+
     public void doLookup() {
         setStatusText("initializing");
         Session thisQuestion = new Session();
@@ -348,6 +365,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         thisQuestion.qclass = (((Spinner) findViewById(R.id.spinnerCLASS))).getSelectedItem().toString();
         thisQuestion.server = gettxtResolverContent().trim();
         thisQuestion.TCP = ((CheckBox) findViewById(R.id.cbTCP)).isChecked();
+        thisQuestion.protocol = (((Spinner) findViewById(R.id.spinnerProto))).getSelectedItem().toString();
         doLookup(thisQuestion);
     }
 

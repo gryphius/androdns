@@ -64,16 +64,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/lblServer" />
-
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
         <EditText
             android:id="@+id/txtServerName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="DNS server, leave empty for system resolver"
+            android:hint="blank for system resolver"
             android:inputType="text"
-            />
-
+            android:layout_weight="1"
+            /><Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinnerProto"
+            android:layout_weight="2"
+            android:entries="@array/protocols" />
+        </LinearLayout>
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
