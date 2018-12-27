@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -67,6 +68,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     protected void onStart() {
         super.onStart();
         (((Spinner) findViewById(R.id.spinnerKnownTypes))).setOnItemSelectedListener(this);
+        (((Spinner) findViewById(R.id.spinnerProto))).setOnItemSelectedListener(this);
     }
 
     @Override
@@ -524,9 +526,34 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String selected = (String) (((Spinner) findViewById(R.id.spinnerKnownTypes))).getSelectedItem();
-        String selectedNumber = "" + Type.value(selected);
-        (((EditText) findViewById(R.id.txtQTYPE))).setText(selectedNumber);
+
+
+        //disable TCP checkbox based on selected protocol
+        Log.d("BLUBB", "Parent: "+parent+" View: "+view);
+
+        Spinner spProtocol = (Spinner) findViewById(R.id.spinnerProto);
+        if (parent==spProtocol){
+
+            String proto = (String) spProtocol.getSelectedItem();
+            boolean  alwaysTCP=false;
+            CheckBox tcpCheckbox = (CheckBox) findViewById(R.id.cbTCP);
+            if (!proto.equalsIgnoreCase("DNS")){ //DoH and DoT are always TCP
+                alwaysTCP=true;
+                tcpCheckbox.setChecked(true);
+            }
+
+            tcpCheckbox.setEnabled(!alwaysTCP);
+        }
+
+
+
+        // set qtype number from spinner
+        Spinner spKnownTypes = (Spinner) findViewById(R.id.spinnerKnownTypes);
+        if (parent==spKnownTypes) {
+            String selected = (String) spKnownTypes.getSelectedItem();
+            String selectedNumber = "" + Type.value(selected);
+            (((EditText) findViewById(R.id.txtQTYPE))).setText(selectedNumber);
+        }
     }
 
     @Override
