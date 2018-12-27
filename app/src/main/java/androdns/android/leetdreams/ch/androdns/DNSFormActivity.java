@@ -232,12 +232,22 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             Resolver resolver = null;
 
             String resolverHostname = session.server;
-            answerState.server = hostToAddr(resolverHostname);
+
 
             String hostnameArg = resolverHostname;
             if (hostnameArg.trim().equals("")){
-                hostnameArg=null;
+                DnsServersDetector detector = new DnsServersDetector(this);
+                String[] dnsServers=detector.getServers();
+                if(dnsServers.length>0){
+                    hostnameArg=dnsServers[0];
+                } else {
+                    hostnameArg=null;
+                }
+                Log.d(TAG,"Auto detected DNS Server: "+hostnameArg);
             }
+
+            answerState.server = hostToAddr(hostnameArg);
+
 
             if (session.protocol.equalsIgnoreCase("DoT")){
                 resolver = new SimpleDoTResolver(hostnameArg);
