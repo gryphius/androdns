@@ -6,8 +6,8 @@ android {
         applicationId "androdns.android.leetdreams.ch.androdns"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 8
-        versionName "1.5beta2"
+        versionCode 9
+        versionName "1.5beta3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
