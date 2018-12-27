@@ -248,6 +248,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
             answerState.server = hostToAddr(hostnameArg);
 
+            //update the server ip in the gui before the query, so we see it while we try to connect
+            setTextViewContent(R.id.txtServerIP,answerState.server);
 
             if (session.protocol.equalsIgnoreCase("DoT")){
                 resolver = new SimpleDoTResolver(hostnameArg);
@@ -256,8 +258,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             } else {
                 resolver = new SimpleResolver(hostnameArg);
             }
-
-
 
             if (session.flag_DO) {
                 resolver.setEDNS(0, 0, Flags.DO, null);
