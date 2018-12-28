@@ -42,7 +42,6 @@ import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -93,13 +92,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
      * history: if true, do not update the title
      */
     public void updateScreenState(final AnswerScreenState state, final boolean history){
-
-
-
-        DecimalFormat df = new DecimalFormat("#.###");
-        df.setRoundingMode(RoundingMode.CEILING);
-        final String ampFactor = df.format(state.ampFactor);
-
         Runnable guiUpdate = new Runnable() {
             @Override
             public void run() {
@@ -111,7 +103,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 ((TextView) findViewById(R.id.txtServerIP)).setText(state.server);
                 ((TextView) findViewById(R.id.txtQbytes)).setText(""+state.qsize);
                 ((TextView) findViewById(R.id.txtAbytes)).setText(""+state.asize);
-                ((TextView) findViewById(R.id.txtAmpfactor)).setText(ampFactor);
                 ((EditText) findViewById(R.id.txtResult)).setText(state.answerText);
                 if (state.rcode>-1) {
                     ((TextView) findViewById(R.id.txtRcode)).setText(Rcode.string(state.rcode));
@@ -312,9 +303,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             session.duration = duration;
             answerState.status = duration +" ms";
             answerState.asize = response.numBytes();
-
-
-            answerState.ampFactor = ((float)response.numBytes()/(float)querybytes);
 
             int rcode = response.getHeader().getRcode();
             answerState.rcode = rcode;

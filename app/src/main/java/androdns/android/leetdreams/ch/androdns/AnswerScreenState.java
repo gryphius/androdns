@@ -11,7 +11,6 @@ public class AnswerScreenState implements Serializable {
     public int rcode=-1;
     public String server="";
 
-    public float ampFactor = 0;
     public int qsize=0;
     public int asize=0;
 
