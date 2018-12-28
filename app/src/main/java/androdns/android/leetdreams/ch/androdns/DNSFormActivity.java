@@ -224,7 +224,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         session.runtimestamp = System.currentTimeMillis();
         AnswerScreenState answerState = new AnswerScreenState();
         String answerOutput="";
-        String validationStatus = "";
 
         try {
             // Set up the query
@@ -335,8 +334,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             ansBuffer.append("ADDITIONAL SECTION:\n");
             ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
 
-
-
             // DNSSSEC validation
             DNSSECVerifier verifier = getDnssecVerifier();
             verifier.learnDNSSECKeysFromRRSETs(response.getSectionRRsets(Section.ANSWER));
@@ -383,11 +380,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         updateStreenStateIfCurrent(session,answerState);
     }
 
-
     public void clearAnswer(){
         updateScreenState(new AnswerScreenState(), false);
     }
-
 
     public void doLookup() {
         setStatusText("initializing");
