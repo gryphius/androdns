@@ -51,6 +51,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     private static final String TAG = "AndroDNS";
     private Session activeSession = null;
     private History history;
+    private DNSSECVerifier dnssecVerifier=null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +78,13 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.actionbar, menu);
         return true;
+    }
+
+    public DNSSECVerifier getDnssecVerifier(){
+        if (dnssecVerifier==null){
+            dnssecVerifier=new DNSSECVerifier();
+        }
+        return dnssecVerifier;
     }
 
     /**
@@ -118,8 +127,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 ((CheckBox) findViewById(R.id.cbaRA)).setChecked(  state.flag_RA);
                 ((CheckBox) findViewById(R.id.cbaAD)).setChecked(  state.flag_AD);
                 ((CheckBox) findViewById(R.id.cbaCD)).setChecked(  state.flag_CD);
-
-
             }
         };
 
@@ -217,6 +224,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         session.runtimestamp = System.currentTimeMillis();
         AnswerScreenState answerState = new AnswerScreenState();
         String answerOutput="";
+        String validationStatus = "";
 
         try {
             // Set up the query
@@ -327,6 +335,20 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             ansBuffer.append("ADDITIONAL SECTION:\n");
             ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
 
+
+
+            // DNSSSEC validation
+            DNSSECVerifier verifier = getDnssecVerifier();
+            verifier.learnDNSSECKeysFromRRSETs(response.getSectionRRsets(Section.ANSWER));
+
+            if(session.flag_DO) {
+                ansBuffer.append("\nvalidation status :\n");
+                ansBuffer.append(verifier.verificationStatusString(response.getSectionRRsets(Section.ANSWER)));
+                ansBuffer.append(verifier.verificationStatusString(response.getSectionRRsets(Section.AUTHORITY)));
+                ansBuffer.append("\n");
+            }
+
+
             answerOutput = ansBuffer.toString();
         } catch (TextParseException e) {
             if (activeSession == session) {
@@ -356,6 +378,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         }
         session.answer = answerState;
         answerState.answerText = answerOutput;
+
         history.addEntry(session);
         updateStreenStateIfCurrent(session,answerState);
     }
