@@ -12,4 +12,5 @@
     </string-array>
     <string name="title_activity_history">HistoryActivity</string>
     <string name="history">History</string>
+    <string name="help">Help</string>
 </resources>
