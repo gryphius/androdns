@@ -46,7 +46,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnFocusChangeListener {
     private static final String TAG = "AndroDNS";
     private Session activeSession = null;
     private History history;
@@ -70,6 +70,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         super.onStart();
         (((Spinner) findViewById(R.id.spinnerKnownTypes))).setOnItemSelectedListener(this);
         (((Spinner) findViewById(R.id.spinnerProto))).setOnItemSelectedListener(this);
+        (((EditText) findViewById(R.id.txtQTYPE))).setOnFocusChangeListener(this);
     }
 
     @Override
@@ -546,11 +547,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-
-        //disable TCP checkbox based on selected protocol
-        Log.d("BLUBB", "Parent: "+parent+" View: "+view);
-
         Spinner spProtocol = (Spinner) findViewById(R.id.spinnerProto);
         if (parent==spProtocol){
 
@@ -574,6 +570,27 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     }
 
     @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        EditText txtQtype = (((EditText) findViewById(R.id.txtQTYPE)));
+        Spinner spKnownTypes = (Spinner) findViewById(R.id.spinnerKnownTypes);
+
+        // set spinner qtype from number
+        if(view==txtQtype && !hasFocus){
+            try{
+                int qtype = gettxtQTYPEContent();
+                String qnameString = Type.string(qtype);
+                int ind = getIndex(spKnownTypes,qnameString,-1);
+                if (ind>-1){
+                    spKnownTypes.setSelection(ind);
+                }
+            }catch (Exception e){}
+        }
+
+
+    }
+
+
+    @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
@@ -594,10 +611,14 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         return (((EditText) findViewById(txtID))).getText().toString();
     }
 
-    //private method of your class
     private int getIndex(Spinner spinner, String myString)
     {
-        int index = 0;
+        return getIndex(spinner,myString,0);
+    }
+
+    private int getIndex(Spinner spinner, String myString, int notFoundDefault)
+    {
+        int index = notFoundDefault;
 
         for (int i=0;i<spinner.getCount();i++){
             if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(myString)){
@@ -607,4 +628,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         }
         return index;
     }
+
+
 }
