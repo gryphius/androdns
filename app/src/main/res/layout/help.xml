@@ -7,6 +7,13 @@
     android:background="#eeeeee"
     android:orientation="vertical"
     >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scrollViewHelp"
+        >
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -16,12 +23,23 @@
         >
     <!-- Help with the help of https://stackoverflow.com/a/46009430/774116 -->
 
+
+
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="AndroDNS HELP"
+            />
     <TextView
         style="@style/TextAppearance.AppCompat.Caption"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="QNAME"
     />
+
     <TextView
         style="@style/TextAppearance.AppCompat.Body1"
         android:layout_width="match_parent"
@@ -116,5 +134,7 @@
         android:autoLink="web"
         android:text="https://github.com/gryphius/androdns"
         />
+
 </LinearLayout>
+    </ScrollView>
 </LinearLayout>

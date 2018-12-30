@@ -43,7 +43,6 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 import java.io.IOException;
-import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -663,5 +662,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 return true;
             }
         });
+
     }
 }
