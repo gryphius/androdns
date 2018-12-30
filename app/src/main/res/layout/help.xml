@@ -39,7 +39,7 @@
         style="@style/TextAppearance.AppCompat.Body1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hostname or IP of the server to send the query to. If blank, the app tries to auto-detect local DNS resolver, but this may not be reliable. For DoH this can also be an URI without the 'dns=' template, for example: https://dns.quad9.net/dns-query . https:// is added automatically if missing"
+        android:text="Hostname or IP of the server to send the query to. If blank, the app tries to auto-detect local DNS resolver, but this may not be reliable. For DoH this can also be a URI without the 'dns=' template, for example: https://dns.quad9.net/dns-query . https:// is added automatically if missing"
         />
 
     <TextView
