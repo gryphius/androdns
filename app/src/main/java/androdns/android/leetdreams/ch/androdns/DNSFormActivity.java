@@ -43,6 +43,7 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 import java.io.IOException;
+import java.net.IDN;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -227,6 +228,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         try {
             // Set up the query
             String qname = session.qname;
+
+            // IDNA: convert to ACE String
+            qname=IDN.toASCII(qname);
+
             if (!qname.endsWith(".")) {
                 qname = qname + ".";
             }
@@ -240,7 +245,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             String resolverHostname = session.server;
 
 
-            String hostnameArg = resolverHostname;
+            String hostnameArg = IDN.toASCII(resolverHostname);
             if (hostnameArg.trim().equals("")){
                 DnsServersDetector detector = new DnsServersDetector(this);
                 String[] dnsServers=detector.getServers();
