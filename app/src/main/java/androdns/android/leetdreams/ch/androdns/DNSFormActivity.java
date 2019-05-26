@@ -48,6 +48,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -553,7 +554,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 spinnerArray.add(textual);
             }
         }
-
+        Collections.sort(spinnerArray);
         (((Spinner) findViewById(R.id.spinnerKnownTypes))).setAdapter(adapter);
     }
 
