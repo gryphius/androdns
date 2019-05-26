@@ -5,8 +5,8 @@ android {
     defaultConfig {
         applicationId "androdns.android.leetdreams.ch.androdns"
         minSdkVersion 15
-        targetSdkVersion 29
-        versionCode 19
+        targetSdkVersion 28
+        versionCode 20
         versionName "1.6beta4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
