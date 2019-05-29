@@ -1,27 +1,26 @@
 package androdns.android.leetdreams.ch.androdns;
 
 import android.content.Context;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+
 import org.xbill.DNS.InvalidTypeException;
 import org.xbill.DNS.Type;
+
 
 /**
  * Created by gryphius on 30.04.17.
  */
 
-public class HistoryAdapter extends ArrayAdapter<Session> {
+public class StarredQueryAdapter extends ArrayAdapter<Session> {
 
     private final Context context;
     private final Session[] values;
 
-    public HistoryAdapter(Context context, Session[] values) {
+    public StarredQueryAdapter(Context context, Session[] values) {
         super(context, -1, values);
         this.context = context;
         this.values = values;
@@ -31,20 +30,17 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.sessiondisplay_history, parent, false);
+        View rowView = inflater.inflate(R.layout.sessiondisplay_starred, parent, false);
 
 
         Session session = values[position];
-
-        TextView dateView = (TextView) rowView.findViewById(R.id.history_entry_date);
-        dateView.setText(getDate(session.runtimestamp, "yyyy-MM-dd hh:mm:ss"));
 
         String qname = session.qname;
         if (!session.server.equals("")){
             qname = qname+"@"+session.server;
         }
 
-        ((TextView) rowView.findViewById(R.id.history_qname)).setText(qname);
+        ((TextView) rowView.findViewById(R.id.starred_qname)).setText(qname);
 
         String type = ""+session.qtype;
         try {
@@ -53,7 +49,7 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
                 type = type + "(" + txtType + ")";
             }
         } catch (InvalidTypeException e) {}
-        ((TextView) rowView.findViewById(R.id.history_qtype)).setText(type);
+        ((TextView) rowView.findViewById(R.id.starred_qtype)).setText(type);
 
         StringBuffer flagsBuffer = new StringBuffer();
 
@@ -82,25 +78,10 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
             flagsBuffer.append("TCP ");
         }
 
-        ((TextView) rowView.findViewById(R.id.history_flags)).setText(flagsBuffer.toString());
+        ((TextView) rowView.findViewById(R.id.starred_flags)).setText(flagsBuffer.toString());
         return rowView;
     }
 
-    /**
-     * Return date in specified format.
-     * @param milliSeconds Date in milliseconds
-     * @param dateFormat Date format
-     * @return String representing date in specified format
-     */
-    public static String getDate(long milliSeconds, String dateFormat)
-    {
-        // Create a DateFormatter object for displaying date in specified format.
-        SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
-        // Create a calendar object that will convert the date and time value in milliseconds to date.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(milliSeconds);
-        return formatter.format(calendar.getTime());
-    }
 }
 

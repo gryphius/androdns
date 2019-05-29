@@ -6,34 +6,30 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 
-public class HistoryActivity extends ListActivity {
+public class StarredQueriesActivity extends ListActivity {
 
-    private History history;
+    private StarredQueries starredQueries;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        history = new History(getApplicationContext());
-        history.load();
+        starredQueries = new StarredQueries(getApplicationContext());
+        starredQueries.load();
 
-        HistoryAdapter adapter = new HistoryAdapter(this,history.getHistory().toArray(new Session[0]));
+        StarredQueryAdapter adapter = new StarredQueryAdapter(this,starredQueries.getStarredList().toArray(new Session[0]));
         setListAdapter(adapter);
-
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("entry", position);
-        resultIntent.putExtra("source", "history");
+        resultIntent.putExtra("source", "starred");
 
         setResult(Activity.RESULT_OK, resultIntent);
         finish();
     }
-
 }

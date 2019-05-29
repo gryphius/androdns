@@ -7,7 +7,12 @@
         android:icon="@drawable/history"
         android:title="@string/history"
         app:showAsAction="ifRoom|withText"
-
+        />
+    <item
+        android:id="@+id/action_star"
+        android:icon="@drawable/starblack"
+        android:title="@string/starred"
+        app:showAsAction="ifRoom|withText"
         />
     <item
         android:id="@+id/action_help"

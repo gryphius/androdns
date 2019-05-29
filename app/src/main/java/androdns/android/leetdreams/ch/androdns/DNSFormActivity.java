@@ -1,6 +1,8 @@
 package androdns.android.leetdreams.ch.androdns;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
@@ -56,6 +59,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     private static final String TAG = "AndroDNS";
     private Session activeSession = null;
     private History history;
+    private StarredQueries starred;
     private DNSSECVerifier dnssecVerifier=null;
 
     @Override
@@ -69,6 +73,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
         history = new History(getApplicationContext());
         history.load();
+
+        starred = new StarredQueries(getApplicationContext());
+        starred.load();
     }
 
     @Override
@@ -141,7 +148,12 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         Runnable guiUpdate = new Runnable() {
             @Override
             public void run() {
-                setTitle(HistoryAdapter.getDate(session.runtimestamp,"yyyy-MM-dd hh:mm:ss"));
+                long runts = session.runtimestamp;
+                if (runts>0) {
+                    setTitle(HistoryAdapter.getDate(session.runtimestamp, "yyyy-MM-dd hh:mm:ss"));
+                } else {
+                    setTitle("");
+                }
                 ((EditText) findViewById(R.id.txtQname)).setText(session.qname);
                 ((EditText) findViewById(R.id.txtServerName)).setText(session.server);
                 ((EditText) findViewById(R.id.txtQTYPE)).setText(""+session.qtype);
@@ -164,6 +176,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 ((CheckBox) findViewById(R.id.cbCD)).setChecked(session.flag_CD);
                 ((CheckBox) findViewById(R.id.cbRD)).setChecked(session.flag_RD);
                 ((CheckBox) findViewById(R.id.cbDO)).setChecked(session.flag_DO);
+
+
             }
         };
 
@@ -172,6 +186,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         if (session.answer!=null){
             updateScreenState(session.answer,true);
         }
+        updateStarredImageState();
     }
 
     /**
@@ -187,12 +202,19 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_history:
-                Intent intent = new Intent(this, HistoryActivity.class);
-                startActivityForResult(intent,1);
+                Intent historyIntent = new Intent(this, HistoryActivity.class);
+                startActivityForResult(historyIntent,1);
+                return true;
+
+            case R.id.action_star:
+                Intent starIntent = new Intent(this, StarredQueriesActivity.class);
+                startActivityForResult(starIntent,1);
+
                 return true;
 
             case R.id.action_help:
                 showHelp();
+                return true;
 
             default:
                 // If we got here, the user's action was not recognized.
@@ -209,7 +231,19 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             case (1) : {
                 if (resultCode == Activity.RESULT_OK) {
                     int returnValue = data.getIntExtra("entry",0);
-                    setScreenState(history.getSessionAt(returnValue));
+                    String source = data.getStringExtra("source");
+                    if(source == null){
+                        source="history";
+                    }
+                    switch (source){
+                        case "starred":
+                            clearAnswer();
+                            setScreenState(starred.getSessionAt(returnValue));
+                            break;
+                        default: //"history
+                            setScreenState(history.getSessionAt(returnValue));
+                    }
+
                 }
                 break;
             }
@@ -379,6 +413,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         answerState.answerText = answerOutput;
 
         history.addEntry(session);
+        updateStarredImageState();
         updateStreenStateIfCurrent(session,answerState);
     }
 
@@ -386,22 +421,75 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         updateScreenState(new AnswerScreenState(), false);
     }
 
-    public void doLookup() {
-        setStatusText("initializing");
-        Session thisQuestion = new Session();
+    public Session sessionFromScreenState(){
+        Session screenSession = new Session();
 
         //build the question object
         String qname = gettxtQNAMEContent();
-        thisQuestion.qname = qname;
-        thisQuestion.qtype = gettxtQTYPEContent();
-        thisQuestion.flag_RD = ((CheckBox) findViewById(R.id.cbRD)).isChecked();
-        thisQuestion.flag_CD = ((CheckBox) findViewById(R.id.cbCD)).isChecked();
-        thisQuestion.flag_DO = ((CheckBox) findViewById(R.id.cbDO)).isChecked();
-        thisQuestion.qclass = (((Spinner) findViewById(R.id.spinnerCLASS))).getSelectedItem().toString();
-        thisQuestion.server = gettxtResolverContent().trim();
-        thisQuestion.TCP = ((CheckBox) findViewById(R.id.cbTCP)).isChecked();
-        thisQuestion.protocol = (((Spinner) findViewById(R.id.spinnerProto))).getSelectedItem().toString();
+        screenSession.qname = qname;
+        screenSession.qtype = gettxtQTYPEContent();
+        screenSession.flag_RD = ((CheckBox) findViewById(R.id.cbRD)).isChecked();
+        screenSession.flag_CD = ((CheckBox) findViewById(R.id.cbCD)).isChecked();
+        screenSession.flag_DO = ((CheckBox) findViewById(R.id.cbDO)).isChecked();
+        screenSession.qclass = (((Spinner) findViewById(R.id.spinnerCLASS))).getSelectedItem().toString();
+        screenSession.server = gettxtResolverContent().trim();
+        screenSession.TCP = ((CheckBox) findViewById(R.id.cbTCP)).isChecked();
+        screenSession.protocol = (((Spinner) findViewById(R.id.spinnerProto))).getSelectedItem().toString();
+        return screenSession;
+    }
+
+    public void doLookup() {
+        setStatusText("initializing");
+        Session thisQuestion = sessionFromScreenState();
         doLookup(thisQuestion);
+    }
+
+
+    public void updateStarredImageState(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ImageButton btn = (ImageButton)findViewById(R.id.btnStar);
+                Session sess = sessionFromScreenState();
+                if (starred.isStarred(sess)){
+                    btn.setImageResource(R.drawable.starred);
+                } else {
+                    btn.setImageResource(R.drawable.notstarred);
+                }
+
+            }
+        });
+    }
+
+    public void starUnstar(View view){
+        final Session screenSession = sessionFromScreenState();
+        AlertDialog.Builder adb = new AlertDialog.Builder(this);
+
+        final boolean currentlyStarred = starred.isStarred(screenSession);
+
+        adb.setTitle("Star current query?");
+        if (currentlyStarred){
+            adb.setTitle("Unstar current query?");
+        }
+        adb.setIcon(android.R.drawable.ic_dialog_alert);
+        adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!currentlyStarred){
+                            starred.star(screenSession);
+                        } else {
+                            starred.unstar(screenSession);
+                        }
+                        updateStarredImageState();
+                    }
+                });
+                adb.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+        adb.show();
     }
 
     public String hostToAddr(String hostname) {
@@ -508,6 +596,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     public void queryButtonClicked(View view) {
         clearAnswer();
+        updateStarredImageState();
         hideKeyboard(this);
 
         Thread thread = new Thread(new Runnable() {
@@ -580,10 +669,13 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             String selectedNumber = "" + Type.value(selected);
             (((EditText) findViewById(R.id.txtQTYPE))).setText(selectedNumber);
         }
+
+        updateStarredImageState();
     }
 
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
+
         EditText txtQtype = (((EditText) findViewById(R.id.txtQTYPE)));
         Spinner spKnownTypes = (Spinner) findViewById(R.id.spinnerKnownTypes);
 
@@ -599,6 +691,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             }catch (Exception e){}
         }
 
+        updateStarredImageState();
 
     }
 
