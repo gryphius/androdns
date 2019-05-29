@@ -11,8 +11,8 @@
         <item>DoH</item>
     </string-array>
     <string name="title_activity_history">HistoryActivity</string>
-    <string name="title_activity_starred">StarredQueriesActivity</string>
+    <string name="title_activity_starred">Favoured queries</string>
     <string name="history">History</string>
-    <string name="starred">Starred Queries</string>
+    <string name="starred">Favoured queries</string>
     <string name="help">Help</string>
 </resources>

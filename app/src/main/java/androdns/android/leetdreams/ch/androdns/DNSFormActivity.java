@@ -467,9 +467,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
         final boolean currentlyStarred = starred.isStarred(screenSession);
 
-        adb.setTitle("Star current query?");
+        adb.setTitle("Add current query to favourites?");
         if (currentlyStarred){
-            adb.setTitle("Unstar current query?");
+            adb.setTitle("Remove current query from favourites?");
         }
         adb.setIcon(android.R.drawable.ic_dialog_alert);
         adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
