@@ -2,7 +2,6 @@ package androdns.android.leetdreams.ch.androdns;
 
 import android.content.Context;
 import android.util.JsonWriter;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,31 +12,28 @@ import org.xbill.DNS.Type;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 
 
-public class StarredQueries {
-    private ArrayList<Session> starredList = new ArrayList<Session>();
-    private static final String starredFile = "starred.json";
+public class BookmarkedQueries {
+    private ArrayList<Session> bookmarks = new ArrayList<Session>();
+    private static final String bookmarkFile = "bookmarks.json";
     private Context context = null;
 
-    public StarredQueries(Context context) {
+    public BookmarkedQueries(Context context) {
         this.context = context;
     }
 
     public void save() {
         try {
 
-            FileOutputStream fos = context.openFileOutput(starredFile, Context.MODE_PRIVATE);
+            FileOutputStream fos = context.openFileOutput(bookmarkFile, Context.MODE_PRIVATE);
 
             JsonWriter writer = new JsonWriter(new OutputStreamWriter(fos, "UTF-8"));
             writer.setIndent("  ");
             writer.beginArray();
-            for (Session s : starredList) {
+            for (Session s : bookmarks) {
                 s.toJSON(writer);
             }
             writer.endArray();
@@ -50,7 +46,7 @@ public class StarredQueries {
     public String loadJSONStringFromFile() {
         String json = null;
         try {
-            InputStream is = context.openFileInput(starredFile);
+            InputStream is = context.openFileInput(bookmarkFile);
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -64,7 +60,7 @@ public class StarredQueries {
     }
 
     public void load() {
-        starredList.clear();
+        bookmarks.clear();
         try {
             JSONTokener tokener = new JSONTokener(loadJSONStringFromFile());
             JSONArray jsa = new JSONArray(tokener);
@@ -73,7 +69,7 @@ public class StarredQueries {
                 Session s = new Session();
                 try {
                     s.fromJSON(obj);
-                    starredList.add(s);
+                    bookmarks.add(s);
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
@@ -82,40 +78,40 @@ public class StarredQueries {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(starredList.isEmpty()){
-            starredList = getDefaultStarredList();
+        if(bookmarks.isEmpty()){
+            bookmarks = getDefaultBookmarks();
         }
     }
 
-    public void star(Session s) {
-        if(!isStarred(s)) {
-            starredList.add(s);
+    public void bookmark(Session s) {
+        if(!isBookmarked(s)) {
+            bookmarks.add(s);
         }
         save();
     }
 
-    public void unstar(Session s) {
-        starredList.remove(s);
+    public void removeBookmark(Session s) {
+        bookmarks.remove(s);
         save();
     }
 
-    public ArrayList<Session> getStarredList() {
-        return starredList;
+    public ArrayList<Session> getBookmarks() {
+        return bookmarks;
     }
 
-    public void setStarredList(ArrayList<Session> newlist) {
-        starredList = newlist;
+    public void setBookmarks(ArrayList<Session> newBookmarks) {
+        bookmarks = newBookmarks;
     }
 
-    public boolean isStarred(Session s){
-        return starredList.contains(s);
+    public boolean isBookmarked(Session s){
+        return bookmarks.contains(s);
     }
 
     public Session getSessionAt(int position) {
-        return getStarredList().get(position);
+        return getBookmarks().get(position);
     }
 
-    public ArrayList<Session> getDefaultStarredList() {
+    public ArrayList<Session> getDefaultBookmarks() {
 
         ArrayList<Session> defaultList = new ArrayList<Session>();
 

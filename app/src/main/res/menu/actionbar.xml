@@ -9,9 +9,9 @@
         app:showAsAction="ifRoom|withText"
         />
     <item
-        android:id="@+id/action_star"
+        android:id="@+id/action_bookmark"
         android:icon="@drawable/starblack"
-        android:title="@string/starred"
+        android:title="@string/bookmarks"
         app:showAsAction="ifRoom|withText"
         />
     <item

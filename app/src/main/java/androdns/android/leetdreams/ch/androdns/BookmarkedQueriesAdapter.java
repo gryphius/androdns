@@ -15,12 +15,12 @@ import org.xbill.DNS.Type;
  * Created by gryphius on 30.04.17.
  */
 
-public class StarredQueryAdapter extends ArrayAdapter<Session> {
+public class BookmarkedQueriesAdapter extends ArrayAdapter<Session> {
 
     private final Context context;
     private final Session[] values;
 
-    public StarredQueryAdapter(Context context, Session[] values) {
+    public BookmarkedQueriesAdapter(Context context, Session[] values) {
         super(context, -1, values);
         this.context = context;
         this.values = values;
@@ -30,7 +30,7 @@ public class StarredQueryAdapter extends ArrayAdapter<Session> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.sessiondisplay_starred, parent, false);
+        View rowView = inflater.inflate(R.layout.sessiondisplay_bookmark, parent, false);
 
 
         Session session = values[position];
@@ -40,7 +40,7 @@ public class StarredQueryAdapter extends ArrayAdapter<Session> {
             qname = qname+"@"+session.server;
         }
 
-        ((TextView) rowView.findViewById(R.id.starred_qname)).setText(qname);
+        ((TextView) rowView.findViewById(R.id.bookmarked_qname)).setText(qname);
 
         String type = ""+session.qtype;
         try {
@@ -49,7 +49,7 @@ public class StarredQueryAdapter extends ArrayAdapter<Session> {
                 type = type + "(" + txtType + ")";
             }
         } catch (InvalidTypeException e) {}
-        ((TextView) rowView.findViewById(R.id.starred_qtype)).setText(type);
+        ((TextView) rowView.findViewById(R.id.bookmarked_qtype)).setText(type);
 
         StringBuffer flagsBuffer = new StringBuffer();
 
@@ -78,7 +78,7 @@ public class StarredQueryAdapter extends ArrayAdapter<Session> {
             flagsBuffer.append("TCP ");
         }
 
-        ((TextView) rowView.findViewById(R.id.starred_flags)).setText(flagsBuffer.toString());
+        ((TextView) rowView.findViewById(R.id.bookmarked_flags)).setText(flagsBuffer.toString());
         return rowView;
     }
 

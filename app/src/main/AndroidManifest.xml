@@ -31,13 +31,13 @@
         </activity>
 
         <activity
-            android:name=".StarredQueriesActivity"
-            android:label="@string/title_activity_starred"
+            android:name=".BookmarkedQueriesActivity"
+            android:label="@string/title_activity_bookmarks"
             android:parentActivityName=".DNSFormActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="androdns.android.leetdreams.ch.androdns.StarredQueriesActivity" />
+                android:value="androdns.android.leetdreams.ch.androdns.BookmarkedQueriesActivity" />
         </activity>
     </application>
 

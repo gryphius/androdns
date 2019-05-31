@@ -9,17 +9,17 @@ import android.view.View;
 import android.widget.ListView;
 
 
-public class StarredQueriesActivity extends ListActivity {
+public class BookmarkedQueriesActivity extends ListActivity {
 
-    private StarredQueries starredQueries;
+    private BookmarkedQueries bookmarkedQueries;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        starredQueries = new StarredQueries(getApplicationContext());
-        starredQueries.load();
+        bookmarkedQueries = new BookmarkedQueries(getApplicationContext());
+        bookmarkedQueries.load();
 
-        StarredQueryAdapter adapter = new StarredQueryAdapter(this,starredQueries.getStarredList().toArray(new Session[0]));
+        BookmarkedQueriesAdapter adapter = new BookmarkedQueriesAdapter(this, bookmarkedQueries.getBookmarks().toArray(new Session[0]));
         setListAdapter(adapter);
     }
 
@@ -27,7 +27,7 @@ public class StarredQueriesActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("entry", position);
-        resultIntent.putExtra("source", "starred");
+        resultIntent.putExtra("source", "bookmarks");
 
         setResult(Activity.RESULT_OK, resultIntent);
         finish();

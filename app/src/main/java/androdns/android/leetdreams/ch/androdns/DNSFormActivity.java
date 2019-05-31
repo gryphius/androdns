@@ -59,7 +59,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     private static final String TAG = "AndroDNS";
     private Session activeSession = null;
     private History history;
-    private StarredQueries starred;
+    private BookmarkedQueries bookmarks;
     private DNSSECVerifier dnssecVerifier=null;
 
     @Override
@@ -74,8 +74,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         history = new History(getApplicationContext());
         history.load();
 
-        starred = new StarredQueries(getApplicationContext());
-        starred.load();
+        bookmarks = new BookmarkedQueries(getApplicationContext());
+        bookmarks.load();
     }
 
     @Override
@@ -186,7 +186,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         if (session.answer!=null){
             updateScreenState(session.answer,true);
         }
-        updateStarredImageState();
+        updateBookmarkImageState();
     }
 
     /**
@@ -206,8 +206,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 startActivityForResult(historyIntent,1);
                 return true;
 
-            case R.id.action_star:
-                Intent starIntent = new Intent(this, StarredQueriesActivity.class);
+            case R.id.action_bookmark:
+                Intent starIntent = new Intent(this, BookmarkedQueriesActivity.class);
                 startActivityForResult(starIntent,1);
 
                 return true;
@@ -236,9 +236,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                         source="history";
                     }
                     switch (source){
-                        case "starred":
+                        case "bookmarks":
                             clearAnswer();
-                            setScreenState(starred.getSessionAt(returnValue));
+                            setScreenState(bookmarks.getSessionAt(returnValue));
                             break;
                         default: //"history
                             setScreenState(history.getSessionAt(returnValue));
@@ -413,7 +413,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         answerState.answerText = answerOutput;
 
         history.addEntry(session);
-        updateStarredImageState();
+        updateBookmarkImageState();
         updateStreenStateIfCurrent(session,answerState);
     }
 
@@ -445,42 +445,42 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
-    public void updateStarredImageState(){
+    public void updateBookmarkImageState(){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ImageButton btn = (ImageButton)findViewById(R.id.btnStar);
+                ImageButton btn = (ImageButton)findViewById(R.id.btnBookmark);
                 Session sess = sessionFromScreenState();
-                if (starred.isStarred(sess)){
-                    btn.setImageResource(R.drawable.starred);
+                if (bookmarks.isBookmarked(sess)){
+                    btn.setImageResource(R.drawable.bookmarked);
                 } else {
-                    btn.setImageResource(R.drawable.notstarred);
+                    btn.setImageResource(R.drawable.notbookmarked);
                 }
 
             }
         });
     }
 
-    public void starUnstar(View view){
+    public void toggleBookmark(View view){
         final Session screenSession = sessionFromScreenState();
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
 
-        final boolean currentlyStarred = starred.isStarred(screenSession);
+        final boolean currentlyBookmarked = bookmarks.isBookmarked(screenSession);
 
-        adb.setTitle("Add current query to favourites?");
-        if (currentlyStarred){
-            adb.setTitle("Remove current query from favourites?");
+        adb.setTitle("Bookmark current query?");
+        if (currentlyBookmarked){
+            adb.setTitle("Remove current query from bookmarks?");
         }
         adb.setIcon(android.R.drawable.ic_dialog_alert);
         adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (!currentlyStarred){
-                            starred.star(screenSession);
+                        if (!currentlyBookmarked){
+                            bookmarks.bookmark(screenSession);
                         } else {
-                            starred.unstar(screenSession);
+                            bookmarks.removeBookmark(screenSession);
                         }
-                        updateStarredImageState();
+                        updateBookmarkImageState();
                     }
                 });
                 adb.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -596,7 +596,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     public void queryButtonClicked(View view) {
         clearAnswer();
-        updateStarredImageState();
+        updateBookmarkImageState();
         hideKeyboard(this);
 
         Thread thread = new Thread(new Runnable() {
@@ -670,7 +670,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             (((EditText) findViewById(R.id.txtQTYPE))).setText(selectedNumber);
         }
 
-        updateStarredImageState();
+        updateBookmarkImageState();
     }
 
     @Override
@@ -691,7 +691,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             }catch (Exception e){}
         }
 
-        updateStarredImageState();
+        updateBookmarkImageState();
 
     }
 
