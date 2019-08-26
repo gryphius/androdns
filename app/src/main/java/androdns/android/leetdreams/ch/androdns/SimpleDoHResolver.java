@@ -60,8 +60,6 @@ public class SimpleDoHResolver extends SimpleDoTResolver {
             urlConnection.setRequestProperty("accept", "application/dns-message");
             urlConnection.setRequestProperty("content-type", "application/dns-message");
 
-
-
             urlConnection.setDoOutput(true);
 
             OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());

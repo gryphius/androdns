@@ -77,6 +77,10 @@ public class SimpleDoTResolver implements Resolver {
      */
     public
     SimpleDoTResolver(String hostname) throws UnknownHostException {
+        this(hostname,DEFAULT_DOT_PORT);
+    }
+
+    public SimpleDoTResolver(String hostname, int port)throws UnknownHostException{
         if (hostname == null) {
             hostname = ResolverConfig.getCurrentConfig().server();
             if (hostname == null)
@@ -87,7 +91,7 @@ public class SimpleDoTResolver implements Resolver {
             addr = InetAddress.getLocalHost();
         else
             addr = InetAddress.getByName(hostname);
-        address = new InetSocketAddress(addr, DEFAULT_DOT_PORT);
+        address = new InetSocketAddress(addr, port);
     }
 
     /**

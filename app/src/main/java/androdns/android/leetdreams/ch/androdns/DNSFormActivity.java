@@ -171,11 +171,16 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 try{
                     protoSpinner.setSelection(getIndex(protoSpinner,session.protocol));
                 }catch (Exception e){} //invalid class
-
+                setDefaultPortFromProto();
                 ((CheckBox) findViewById(R.id.cbTCP)).setChecked(session.TCP);
                 ((CheckBox) findViewById(R.id.cbCD)).setChecked(session.flag_CD);
                 ((CheckBox) findViewById(R.id.cbRD)).setChecked(session.flag_RD);
                 ((CheckBox) findViewById(R.id.cbDO)).setChecked(session.flag_DO);
+
+                int port = session.port;
+                if (port!=0){
+                    setTextViewContent(R.id.txtPort,""+port);
+                }
 
 
             }
@@ -298,11 +303,23 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             setTextViewContent(R.id.txtServerIP,answerState.server);
 
             if (session.protocol.equalsIgnoreCase("DoT")){
-                resolver = new SimpleDoTResolver(hostnameArg);
+                int dotport = SimpleDoTResolver.DEFAULT_DOT_PORT;
+                try{
+                    dotport = gettxtPortContent();
+                } catch(Exception e){
+
+                }
+              resolver= new SimpleDoTResolver(hostnameArg,dotport);
+
+
             } else if(session.protocol.equalsIgnoreCase("DoH")){
                 resolver = new SimpleDoHResolver(hostnameArg);
             } else {
                 resolver = new SimpleResolver(hostnameArg);
+                try {
+                    resolver.setPort(gettxtPortContent());
+                } catch(Exception e){}
+
             }
 
             if (session.flag_DO) {
@@ -435,6 +452,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         screenSession.server = gettxtResolverContent().trim();
         screenSession.TCP = ((CheckBox) findViewById(R.id.cbTCP)).isChecked();
         screenSession.protocol = (((Spinner) findViewById(R.id.spinnerProto))).getSelectedItem().toString();
+        try {
+            screenSession.port = gettxtPortContent();
+        } catch(Exception e){}
         return screenSession;
     }
 
@@ -647,19 +667,43 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         (((Spinner) findViewById(R.id.spinnerKnownTypes))).setAdapter(adapter);
     }
 
+    public void setDefaultPortFromProto(){
+        Spinner spProtocol = (Spinner) findViewById(R.id.spinnerProto);
+        String proto = (String) spProtocol.getSelectedItem();
+
+        EditText etPort =(EditText)findViewById(R.id.txtPort);
+        int defaultPort=53;
+        if(proto.equalsIgnoreCase("DoT")){
+            defaultPort=853;
+        }
+
+        etPort.setText(""+defaultPort);
+
+        //Port for DoH is in the URL
+        if(proto.equalsIgnoreCase("DoH")){
+            etPort.setEnabled(false);
+            etPort.setText("(from URI)");
+        } else {
+            etPort.setEnabled(true);
+        }
+    }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         Spinner spProtocol = (Spinner) findViewById(R.id.spinnerProto);
         if (parent==spProtocol){
 
+            // set TCP flag state from proto
             String proto = (String) spProtocol.getSelectedItem();
-
             CheckBox tcpCheckbox = (CheckBox) findViewById(R.id.cbTCP);
             if (!proto.equalsIgnoreCase("DNS")){ //DoH and DoT are always TCP
                 tcpCheckbox.setEnabled(false);
             } else {
                 tcpCheckbox.setEnabled(true);
             }
+
+        setDefaultPortFromProto();
+
         }
 
         // set qtype number from spinner
@@ -709,6 +753,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         return getTextFieldContent(R.id.txtQname);
     }
 
+
+    public int gettxtPortContent(){
+        return Integer.valueOf(getTextFieldContent(R.id.txtPort)).intValue();
+    }
     public int gettxtQTYPEContent() {
         return Integer.valueOf(getTextFieldContent(R.id.txtQTYPE)).intValue();
     }
