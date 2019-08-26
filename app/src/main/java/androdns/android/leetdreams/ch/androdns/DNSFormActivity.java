@@ -17,9 +17,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -199,6 +202,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
      **/
     public void updateStreenStateIfCurrent(Session session, AnswerScreenState state){
         if (session == activeSession){
+            ((Button)findViewById(R.id.button)).clearAnimation();
             updateScreenState(state,false);
         }
     }
@@ -363,7 +367,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             if (activeSession !=session){
                 return; // this query has been aborted/overwritten by a new one
             }
-
+            ((Button)findViewById(R.id.button)).clearAnimation();
             long duration=System.currentTimeMillis()-startTS;
             session.duration = duration;
             answerState.status = duration +" ms";
@@ -624,8 +628,15 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             @Override
             public void run() {
                 try {
+                    Animation anim = new AlphaAnimation(0.5f, 1.0f);
+                    anim.setDuration(50); //You can manage the blinking time with this parameter
+                    anim.setStartOffset(20);
+                    anim.setRepeatMode(Animation.REVERSE);
+                    anim.setRepeatCount(Animation.INFINITE);
+                    ((Button)findViewById(R.id.button)).startAnimation(anim);
+
+
                     doLookup();
-                    ;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
