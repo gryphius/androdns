@@ -14,6 +14,7 @@ public class Session implements Serializable {
     public int qtype;
     public String qclass; //CH, IN, HS
     public String protocol; // DNS, DoT, DoH
+    public int port;
 
     public boolean flag_RD;
     public boolean flag_CD;
@@ -52,6 +53,7 @@ public class Session implements Serializable {
                 && other.flag_CD == this.flag_CD
                 && other.flag_DO == this.flag_DO
                 && other.TCP == this.TCP
+                && other.port == this.port
         );
     }
 
@@ -70,6 +72,7 @@ public class Session implements Serializable {
         this.flag_CD=false;
         this.flag_DO=false;
         this.TCP = false;
+        this.port = 0;
     }
 
     public Session(String qname, int qtype){
@@ -89,6 +92,7 @@ public class Session implements Serializable {
         writer.name("flag_cd").value(flag_CD);
         writer.name("flag_do").value(flag_DO);
         writer.name("tcp").value(TCP);
+        writer.name("port").value(port);
         writer.endObject();
     }
 
@@ -102,5 +106,24 @@ public class Session implements Serializable {
         flag_CD = json.getBoolean("flag_cd");
         flag_DO = json.getBoolean("flag_do");
         TCP = json.getBoolean("tcp");
+        try {
+            port = json.getInt("port");
+        } catch(JSONException e){
+            port = 0;
+        }
+
+    }
+
+    public boolean isDefaultPort(){
+        if (this.port==0){
+            return true;
+        }
+        if(this.protocol.equalsIgnoreCase("DNS") && this.port==53){
+            return true;
+        }
+        if(this.protocol.equalsIgnoreCase("DoT") && this.port==853){
+            return true;
+        }
+        return false;
     }
 }

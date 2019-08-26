@@ -39,6 +39,9 @@ public class BookmarkedQueriesAdapter extends ArrayAdapter<Session> {
         if (!session.server.equals("")){
             qname = qname+"@"+session.server;
         }
+        if(!session.isDefaultPort()){
+            qname = qname+":"+session.port;
+        }
 
         ((TextView) rowView.findViewById(R.id.bookmarked_qname)).setText(qname);
 
