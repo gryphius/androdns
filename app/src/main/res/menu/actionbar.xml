@@ -4,19 +4,19 @@
 
     <item
         android:id="@+id/action_history"
-        android:icon="@drawable/history"
+        android:icon="@drawable/ic_history_24px"
         android:title="@string/history"
         app:showAsAction="ifRoom|withText"
         />
     <item
         android:id="@+id/action_bookmark"
-        android:icon="@drawable/starblack"
+        android:icon="@drawable/ic_bookmarks_24px"
         android:title="@string/bookmarks"
         app:showAsAction="ifRoom|withText"
         />
     <item
         android:id="@+id/action_help"
-        android:icon="@drawable/help"
+        android:icon="@drawable/ic_help_outline_24px"
         android:title="@string/help"
         app:showAsAction="ifRoom|withText"
 

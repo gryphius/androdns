@@ -476,9 +476,9 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 ImageButton btn = (ImageButton)findViewById(R.id.btnBookmark);
                 Session sess = sessionFromScreenState();
                 if (bookmarks.isBookmarked(sess)){
-                    btn.setImageResource(R.drawable.bookmarked);
+                    btn.setImageResource(R.drawable.ic_bookmark_24px);
                 } else {
-                    btn.setImageResource(R.drawable.notbookmarked);
+                    btn.setImageResource(R.drawable.ic_bookmark_border_24px);
                 }
 
             }
@@ -797,29 +797,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
 
     public void showHelp(){
-        // inflate the layout of the popup window
-        LayoutInflater inflater = (LayoutInflater)
-                getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.help, null);
-
-        // create the popup window
-        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
-        popupWindow.showAtLocation(findViewById(R.id.scrollViewMain), Gravity.CENTER, 0, 0);
-
-        // dismiss the popup window when touched
-        popupView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                popupWindow.dismiss();
-                return true;
-            }
-        });
-
+        Intent helpIntent=new Intent(this,HelpActivity.class);
+        this.startActivity(helpIntent);
     }
 }

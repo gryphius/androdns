@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+            <TextView
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="AndroDNS HELP"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="QNAME"
+                />
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set the name to be queried. The trailing dot is added automatically"
+                />
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Server"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hostname or IP of the server to send the query to. If blank, the app tries to auto-detect local DNS resolver, but this may not be reliable. For DoH this can also be a URI without the 'dns=' template, for example: https://dns.quad9.net/dns-query . https:// is added automatically if missing"
+                />
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Transport"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select DNS for plain DNS, DoT for DNS-over-TLS or DoH for DNS-over-HTTPS"
+                />
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Query Type"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="The record type can either be selected in the drop-down or entered as type ID in the text field"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Flags/Options"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RD: Set 'Recursion Desired' flag. CD: Set 'Check Disabled' flag. DO: Set 'DNSSEC OK' flag. TCP: send the query over TCP (only applies to plain DNS transport. DoT and DOH are always TCP)"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Answer"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status: shows query status and response time. RCODE: DNS query reply code. IP: address of the dns server if it was entered as hostname. Qsize/ASize: query/answer packet size. Flags: AA: Authoritative Answer, TC: Truncated, RA: Recursion Available, AD: Authenticated Data"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="DNSSEC"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="If the DO bit is set, the app will try to validate RRSIGS against known DNSKEYs. It does not start any DNS queries by itself, so the user has to query DNSKEY of a domain before signatures can be validated."
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="source/bug reports/feature requests"
+                />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:text="https://github.com/gryphius/androdns"
+                />
+
+
+</LinearLayout>

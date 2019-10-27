@@ -11,6 +11,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <activity android:name=".HelpActivity"></activity>
         <activity
             android:name=".DNSFormActivity"
             android:windowSoftInputMode="stateUnchanged|adjustResize">
@@ -29,7 +30,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="androdns.android.leetdreams.ch.androdns.DNSFormActivity" />
         </activity>
-
         <activity
             android:name=".BookmarkedQueriesActivity"
             android:label="@string/title_activity_bookmarks"

@@ -53,7 +53,7 @@
                 <ImageButton
                     android:id="@+id/btnBookmark"
                     android:onClick="toggleBookmark"
-                    android:src="@drawable/notbookmarked"
+                    android:src="@drawable/ic_bookmark_24px"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:scaleType="fitCenter"
