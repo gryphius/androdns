@@ -59,6 +59,10 @@ public class SimpleDoHResolver extends SimpleDoTResolver {
             urlConnection.setReadTimeout(CONNECT_READ_TIMEOUT);
             urlConnection.setRequestProperty("accept", "application/dns-message");
             urlConnection.setRequestProperty("content-type", "application/dns-message");
+            // disable default user-agent header, we don't want to send private info to the server
+            // apparently it's not possible to remove a header from a urlconnection, but at least we
+            // can set it to the empty string
+            urlConnection.setRequestProperty("User-Agent","");
 
             urlConnection.setDoOutput(true);
 
@@ -69,7 +73,7 @@ public class SimpleDoHResolver extends SimpleDoTResolver {
             in = readStream(inStream);
         } catch (Exception e) {
             e.printStackTrace();
-           throw new IOException("DoH query failed: "+e.getMessage());
+           throw new IOException("DoH query failed: "+e.toString());
         }
         return in;
 
