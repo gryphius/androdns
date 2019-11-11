@@ -1,4 +1,7 @@
 package androdns.android.leetdreams.ch.androdns;
+import org.xbill.DNS.Flags;
+import org.xbill.DNS.Header;
+
 import java.io.Serializable;
 
 /**
@@ -26,5 +29,18 @@ public class AnswerScreenState implements Serializable {
 
     public AnswerScreenState(){
 
+    }
+
+    /**
+     * set the flags from a DNS message header
+     * @param header
+     */
+    public void setFlagsFromMessageHeader(Header header) {
+        flag_AA = header.getFlag(Flags.AA);
+        flag_AD = header.getFlag(Flags.AD);
+        flag_TC = header.getFlag(Flags.TC);
+        flag_RD = header.getFlag(Flags.RD);
+        flag_RA = header.getFlag(Flags.RA);
+        flag_CD = header.getFlag(Flags.CD);
     }
 }

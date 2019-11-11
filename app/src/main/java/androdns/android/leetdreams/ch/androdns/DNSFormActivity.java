@@ -309,7 +309,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 Log.d(TAG, "Auto detected DNS Server: " + hostnameArg);
             }
 
-            answerState.server = hostToAddr(hostnameArg);
+            answerState.server = StaticHelpers.hostToAddr(hostnameArg);
 
             //update the server ip in the gui before the query, so we see it while we try to connect
             setTextViewContent(R.id.txtServerIP, answerState.server);
@@ -385,8 +385,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             int rcode = response.getHeader().getRcode();
             answerState.rcode = rcode;
 
-
-            setAnswerFlagsToState(response.getHeader(), answerState);
+            answerState.setFlagsFromMessageHeader(response.getHeader());
 
             if (!query.getQuestion().equals(response.getQuestion())) {
                 ansBuffer.append("response question section does not match our question.\n");
@@ -394,11 +393,11 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 ansBuffer.append("\n");
             }
             ansBuffer.append("ANSWER SECTION:\n");
-            ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ANSWER)));
+            ansBuffer.append(StaticHelpers.rrSetsToString(response.getSectionRRsets(Section.ANSWER)));
             ansBuffer.append("AUTHORITY SECTION:\n");
-            ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.AUTHORITY)));
+            ansBuffer.append(StaticHelpers.rrSetsToString(response.getSectionRRsets(Section.AUTHORITY)));
             ansBuffer.append("ADDITIONAL SECTION:\n");
-            ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
+            ansBuffer.append(StaticHelpers.rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
 
             // DNSSSEC validation
             DNSSECVerifier verifier = getDnssecVerifier();
@@ -447,10 +446,17 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         updateStreenStateIfCurrent(session, answerState);
     }
 
+    /**
+     * clear the answer state screen
+     */
     public void clearAnswer() {
         updateScreenState(new AnswerScreenState(), false);
     }
 
+    /**
+     * build a session object based on current screen state
+     * @return
+     */
     public Session sessionFromScreenState() {
         Session screenSession = new Session();
 
@@ -472,13 +478,18 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         return screenSession;
     }
 
+    /**
+     * start the DNS lookup process
+     */
     public void doLookup() {
         setStatusText("initializing");
         Session thisQuestion = sessionFromScreenState();
         doLookup(thisQuestion);
     }
 
-
+    /**
+     * refresh the bookmark image based on wheter current question is already bookmarked
+     */
     public void updateBookmarkImageState() {
         runOnUiThread(new Runnable() {
             @Override
@@ -495,6 +506,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         });
     }
 
+    /**
+     * ask user if we should add current query to bookmarks/remove current query from bookmarks
+     * @param view
+     */
     public void toggleBookmark(View view) {
         final Session screenSession = sessionFromScreenState();
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
@@ -526,88 +541,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         adb.show();
     }
 
-    public String hostToAddr(String hostname) {
-        if (hostname == null || hostname == "") {
-            hostname = ResolverConfig.getCurrentConfig().server();
-            if (hostname == null) {
-                hostname = "0";
-            }
-        }
-        InetAddress addr;
-        try {
-            if (hostname.equals("0"))
-                addr = InetAddress.getLocalHost();
-            else
-                addr = InetAddress.getByName(hostname);
-            InetSocketAddress address = new InetSocketAddress(addr, 53);
-            return address.getAddress().getHostAddress();
-        } catch (UnknownHostException e) {
-
-        }
-        return "";
-    }
-
-    private void setAnswerFlagsToState(Header header, AnswerScreenState state) {
-        state.flag_AA = header.getFlag(Flags.AA);
-        state.flag_AD = header.getFlag(Flags.AD);
-        state.flag_TC = header.getFlag(Flags.TC);
-        state.flag_RD = header.getFlag(Flags.RD);
-        state.flag_RA = header.getFlag(Flags.RA);
-        state.flag_CD = header.getFlag(Flags.CD);
-    }
-
-    public String rrSetsToString(RRset[] rrsets) {
-        StringBuffer ansBuffer = new StringBuffer();
-        Iterator it;
-        int i;
-
-        for (i = 0; i < rrsets.length; i++) {
-            RRset rrset = rrsets[i];
-            it = rrset.rrs();
-
-            while (it.hasNext()) {
-                Record r = (Record) it.next();
-                //Log.i(TAG, "rrsetstostring: type=" + r.getType());
-                ansBuffer.append(r.toString());
-                ansBuffer.append("\n");
-            }
-
-            //RRSIGs
-            final Iterator<Record> sigIter = rrset.sigs();
-            while (sigIter.hasNext()) {
-                final Record sigRec = sigIter.next();
-
-                ansBuffer.append(sigRec.toString());
-                ansBuffer.append("\n");
-            }
-        }
-        //replace tabs
-        String ret = ansBuffer.toString().replace('\t', ' ');
-        return ret;
-    }
-
-    private void setAnsTextFromThread(final String content) {
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ((EditText) findViewById(R.id.txtResult)).setText(content);
-            }
-        });
-    }
-
-
-    private void setAnsFlagFromThread(final int cbID, boolean checked) {
-        final boolean set_checked = checked;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ((CheckBox) findViewById(cbID)).setChecked(set_checked);
-            }
-        });
-
-    }
-
+    /**
+     * hide the on-screen keyboard
+     * @param activity
+     */
     public static void hideKeyboard(Activity activity) {
         if (isKeyboardVisible(activity)) {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -615,6 +552,11 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
+    /**
+     * returns True if the on-screen keyboard is currently visible
+     * @param activity
+     * @return
+     */
     public static boolean isKeyboardVisible(Activity activity) {
         ///This method is based on the one described at http://stackoverflow.com/questions/4745988/how-do-i-detect-if-software-keyboard-is-visible-on-android-device
         Rect r = new Rect();
@@ -628,6 +570,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 (keypadHeight > screenHeight * 0.15);
     }
 
+    /**
+     * handler executed when the user clicks on "Query"
+     * @param view
+     */
     public void queryButtonClicked(View view) {
         clearAnswer();
         updateBookmarkImageState();
@@ -656,6 +602,11 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         thread.start();
     }
 
+    /**
+     * set the text in a TextView using the UI-Thread
+     * @param viewID
+     * @param text
+     */
     private void setTextViewContent(final int viewID, final String text) {
         runOnUiThread(new Runnable() {
             @Override
@@ -666,14 +617,17 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     }
 
+    /**
+     * Set the Text in the Status field
+     * @param text
+     */
     private void setStatusText(final String text) {
         setTextViewContent(R.id.txtStatusText, text);
     }
 
-    private void setRcodeText(final String text) {
-        setTextViewContent(R.id.txtRcode, text);
-    }
-
+    /**
+     * fill the QType spinner
+     */
     private void fillQTypes() {
         //
         List<String> spinnerArray = new ArrayList<String>();
@@ -689,6 +643,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         (((Spinner) findViewById(R.id.spinnerKnownTypes))).setAdapter(adapter);
     }
 
+    /**
+     * set the port field to the default based on the selected protocol
+     * the port field is not used for DoH queries where the port is in the URL directly
+     */
     public void setDefaultPortFromProto() {
         Spinner spProtocol = (Spinner) findViewById(R.id.spinnerProto);
         String proto = (String) spProtocol.getSelectedItem();
