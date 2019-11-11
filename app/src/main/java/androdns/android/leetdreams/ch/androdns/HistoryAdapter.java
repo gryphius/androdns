@@ -13,9 +13,8 @@ import org.xbill.DNS.InvalidTypeException;
 import org.xbill.DNS.Type;
 
 /**
- * Created by gryphius on 30.04.17.
+ * Adapter view to display the current query history a ListView
  */
-
 public class HistoryAdapter extends ArrayAdapter<Session> {
 
     private final Context context;

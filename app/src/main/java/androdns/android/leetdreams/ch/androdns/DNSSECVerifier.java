@@ -13,10 +13,26 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+/**
+ * This class implements the functionality to verify DNSSEC signatures
+ * We can only verify RRSIGs for which we have the matching DNSKEYs . AndroDNS does not perform any queries
+ * on its own, so these DNSKEYs must be queried manually by the user. They are cached in memory (in this class)
+ * and not persisted.
+ */
 public class DNSSECVerifier {
+    // this hashtable caches the known DNSKEY rrsets.  Uses the string "<ownername>-<keytag>" as key
     private Hashtable<String,DNSKEYRecord> knownDNSKeys = new Hashtable<String,DNSKEYRecord>();
+
     private static final String TAG="DNSSECVerifier";
 
+    /**
+     * verifies the RRSIGS of a given RRSET against known DNSKEYs. The matching DNSKEY must have been queried
+     * beforehand in the current application setting
+     * @param rrset
+     * @param rrsig
+     * @throws DNSSEC.DNSSECException
+     * @throws DNSKEYUnavailableException if the DNSKEY has not been queried in the current application session
+     */
     public void verifySignature(RRset rrset, RRSIGRecord rrsig) throws DNSSEC.DNSSECException,DNSKEYUnavailableException {
         Name ownerName = rrsig.getSigner();
         int keyTag = rrsig.getFootprint();
@@ -31,13 +47,31 @@ public class DNSSECVerifier {
 
     }
 
+    /**
+     * create the "<ownername>-<keytag>" string to access the DNSKEY hashtable
+     * @param dnskey
+     * @return
+     */
     private String hskey(DNSKEYRecord dnskey){
         return hskey(dnskey.getName().toString(),dnskey.getFootprint());
     }
+
+    /**
+     * create the "<ownername>-<keytag>" string to access the DNSKEY hashtable
+     * @param ownerName
+     * @param keyTag
+     * @return
+     */
     private String hskey(String ownerName, int keyTag){
         return ownerName.toLowerCase()+"-"+keyTag;
     }
 
+    /**
+     * get known DNSKEYrecord from the cache
+     * @param ownerName
+     * @param keyTag
+     * @return
+     */
     public DNSKEYRecord getDNSKEY(Name ownerName, int keyTag){
 
         String hsKey = hskey(ownerName.toString(),keyTag);
@@ -48,11 +82,20 @@ public class DNSSECVerifier {
 
     }
 
+    /**
+     * add a DNSKEYrecord to the cache
+     * @param dnskey
+     */
     public void addDNSKEY(DNSKEYRecord dnskey){
         knownDNSKeys.put(hskey(dnskey),dnskey);
         Log.d(TAG,"learned DNSKEY  "+hskey(dnskey));
     }
 
+    /**
+     * build string to display the current verification status to the user
+     * @param rrsets
+     * @return
+     */
     public String verificationStatusString(RRset[] rrsets){
         StringBuffer buf = new StringBuffer();
         for(RRset rrset:rrsets) {
@@ -92,6 +135,10 @@ public class DNSSECVerifier {
         return validationStatus;
     }
 
+    /**
+     * add all DNSKEY rrs from the rrset to the DNSKEY kcache
+     * @param rrsets
+     */
     public void learnDNSSECKeysFromRRSETs(RRset[] rrsets){
         Iterator it;
         int i;

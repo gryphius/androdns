@@ -16,15 +16,28 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 
+/**
+ * This object represents the list of all bookmarked queries and is responsible for loading/saving
+ * this list
+ */
 public class BookmarkedQueries {
+    //The List of DNS Sessions we want to store/load.
     private ArrayList<Session> bookmarks = new ArrayList<Session>();
+
+    // Filename where we store the list as JSON
     private static final String bookmarkFile = "bookmarks.json";
+
+    // Application Context
     private Context context = null;
 
     public BookmarkedQueries(Context context) {
         this.context = context;
     }
 
+    /**
+     * save the current list of bookmarked sessions as json
+     * This currently fails silently
+     */
     public void save() {
         try {
 
@@ -43,6 +56,10 @@ public class BookmarkedQueries {
         }
     }
 
+    /**
+     * try to load the list of bookmarked sessions from json
+     * @return the JSON as string if available, null otherwise
+     */
     public String loadJSONStringFromFile() {
         String json = null;
         try {
@@ -59,6 +76,10 @@ public class BookmarkedQueries {
         return json;
     }
 
+    /**
+     * load JSON from storage and try to parse it into the list of Session objects.
+     * If this fails for any reason, return a default list of handy bookmarks
+     */
     public void load() {
         bookmarks.clear();
         try {
@@ -83,6 +104,11 @@ public class BookmarkedQueries {
         }
     }
 
+    /**
+     * add session to the list of bookmarks
+     * does nothing if this session is already bookmarked
+     * @param s
+     */
     public void bookmark(Session s) {
         if(!isBookmarked(s)) {
             bookmarks.add(s);
@@ -90,27 +116,55 @@ public class BookmarkedQueries {
         save();
     }
 
+    /**
+     * remove the session from the list of bookmarks
+     * @param s
+     */
     public void removeBookmark(Session s) {
         bookmarks.remove(s);
         save();
     }
 
+    /**
+     *
+     * @return current list of bookmarks
+     */
     public ArrayList<Session> getBookmarks() {
         return bookmarks;
     }
 
+    /**
+     * replace the current bookmark list
+     * @param newBookmarks
+     */
     public void setBookmarks(ArrayList<Session> newBookmarks) {
         bookmarks = newBookmarks;
     }
 
+    /**
+     * returns true if the session is on the list of bookmarks
+     * @param s
+     * @return
+     */
     public boolean isBookmarked(Session s){
         return bookmarks.contains(s);
     }
 
+    /**
+     * returns a specific bookmarked session
+     *
+     * @param position
+     * @return
+     */
     public Session getSessionAt(int position) {
         return getBookmarks().get(position);
     }
 
+    /**
+     * builds a list of default bookmarks, which are often useful in analyzing/debugging the DNS
+     * such as the "use ful names" from PowerDNS: https://powerdns.org/useful-names/
+     * @return
+     */
     public ArrayList<Session> getDefaultBookmarks() {
 
         ArrayList<Session> defaultList = new ArrayList<Session>();

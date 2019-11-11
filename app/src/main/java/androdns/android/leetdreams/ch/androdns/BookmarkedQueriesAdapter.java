@@ -12,7 +12,7 @@ import org.xbill.DNS.Type;
 
 
 /**
- * Created by gryphius on 30.04.17.
+ * Adapter view to display the current bookmarks in a ListView
  */
 
 public class BookmarkedQueriesAdapter extends ArrayAdapter<Session> {

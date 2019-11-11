@@ -10,17 +10,29 @@ import java.util.Collections;
 
 
 /**
- * Created by gryphius on 30.04.17.
+ * This class keeps track of the query history and handles persistence
+ * Currently the query history is simply being serialized and potentially destroyed on application updates
+ * We could change this to using JSON like we do for the bookmarks, but for now nobody has asked for it
+ * Eventually we should think of how to make sure the list does not get too big
  */
 
 public class History {
+    // keeps the full history
     private ArrayList<Session> historyvector = new ArrayList<Session>();
+
+    // filename where we serialize the history into
     private static final String historyFile = "history.dat";
+
+    // application context
     private Context context =null;
     public History(Context context){
         this.context = context;
     }
 
+    /**
+     * serialize the current history into a file
+     * fails silently
+     */
     public void save(){
         try {
             ObjectOutputStream out;
@@ -33,6 +45,10 @@ public class History {
         }
     }
 
+    /**
+     *  try to deserialize the history file into a new history
+     *  // fails silently
+     */
     public void load(){
         ObjectInputStream in;
         try {
@@ -44,11 +60,20 @@ public class History {
         }
     }
 
+
+    /**
+     * add new entry to the history
+     * @param s
+     */
     public void addEntry(Session s){
         historyvector.add(s);
         save();
     }
 
+
+    /**
+     * get the full query history
+     */
     public ArrayList<Session> getHistory(){
         Session[] history = historyvector.toArray(new Session[historyvector.size()]);
 
@@ -58,6 +83,11 @@ public class History {
         return copy;
     }
 
+    /**
+     * get specific history entry at position
+     * @param position
+     * @return
+     */
     public Session getSessionAt(int position){
         return getHistory().get(position);
     }

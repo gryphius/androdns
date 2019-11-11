@@ -39,14 +39,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /**
- * An implementation of Resolver that sends one query to one server.
- * SimpleResolver handles TCP retries, transaction security (TSIG), and
- * EDNS 0.
- * @see Resolver
- * @see TSIG
- * @see OPTRecord
- *
- * @author Brian Wellington
+ * This is a simple copy of the DNSjava built-in SimpleResolver, adapted to wrap the query in a TLS session
  */
 
 

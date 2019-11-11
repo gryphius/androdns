@@ -8,7 +8,9 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ListView;
 
-
+/**
+ * Activity to display the current list of bookmarked queries
+ */
 public class BookmarkedQueriesActivity extends ListActivity {
 
     private BookmarkedQueries bookmarkedQueries;

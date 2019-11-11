@@ -58,6 +58,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * This is the main activity
+ */
 public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnFocusChangeListener {
     private static final String TAG = "AndroDNS";
     private Session activeSession = null;

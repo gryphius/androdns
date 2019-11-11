@@ -8,6 +8,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.Serializable;
 
+/**
+ * Represents a query and response. All question related variables are directly available in this object
+ * All variables related to the response are available in a referenced AnswerScreenState object
+ */
 public class Session implements Serializable {
     public String qname;
     public String server;
@@ -81,6 +85,11 @@ public class Session implements Serializable {
 
     public long duration;
 
+    /**
+     * convert the current session (question part only) into a JSON object
+     * @param writer
+     * @throws IOException
+     */
     public void toJSON(JsonWriter writer) throws IOException {
         writer.beginObject();
         writer.name("qname").value(qname);
@@ -96,6 +105,11 @@ public class Session implements Serializable {
         writer.endObject();
     }
 
+    /**
+     * initialize this object from a JSONobject
+     * @param json
+     * @throws JSONException
+     */
     public void fromJSON(JSONObject json) throws JSONException {
         qname = json.getString("qname");
         server = json.getString("server");
@@ -114,6 +128,12 @@ public class Session implements Serializable {
 
     }
 
+    /**
+     * helper method, returns true if the port used in this query is the default
+     * for the given protocol, i.e. 53 for plain old DNS, 853 for DoT
+     * Note, we do not handle DoH here, for DoH the port is directly in the query url, i.e. servername
+     * @return
+     */
     public boolean isDefaultPort(){
         if (this.port==0){
             return true;

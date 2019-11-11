@@ -2,7 +2,8 @@ package androdns.android.leetdreams.ch.androdns;
 import java.io.Serializable;
 
 /**
- * Created by gryphius on 30.04.17.
+ * The AnswerscreenState Object holds all required variables to build the screen state in the response section,
+ * i.e. all returned flags, answer section, status etc
  */
 
 public class AnswerScreenState implements Serializable {

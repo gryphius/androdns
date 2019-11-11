@@ -10,7 +10,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-
+/**
+ * This activity displays the currently available query history
+ */
 public class HistoryActivity extends ListActivity {
 
     private History history;
@@ -27,6 +29,10 @@ public class HistoryActivity extends ListActivity {
     }
 
     @Override
+    /**
+     * returns the position of the clicked history entry so the calling activity can fetch the
+     * corresponding session
+     */
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("entry", position);

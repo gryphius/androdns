@@ -24,11 +24,14 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /**
- * Created by schacher on 27.12.18.
+ * Simple DNS-over-HTTPS resolver, using the HTTP POST method
+ * https://tools.ietf.org/html/rfc8484
  */
 
 public class SimpleDoHResolver extends SimpleDoTResolver {
     public static final int DEFAULT_DOH_PORT=443;
+
+    // holds the URL where we send the DOH query to
     protected String url = null;
 
     /**
@@ -45,7 +48,13 @@ public class SimpleDoHResolver extends SimpleDoTResolver {
     }
 
 
-
+    /**
+     * send the dns message as a post request to the DOH endpoint
+     * returns a byte array containing the answer
+     * @param query
+     * @return
+     * @throws IOException
+     */
     protected byte[] sendAndReceive(Message query) throws IOException {
         byte [] wireformat = query.toWire(Message.MAXLENGTH);
         byte [] in;
@@ -79,7 +88,11 @@ public class SimpleDoHResolver extends SimpleDoTResolver {
 
     }
 
-
+    /**
+     * read the remainder from inputstream into a bytearray
+     * @param is
+     * @return
+     */
     private byte[] readStream(InputStream is) {
         try {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
@@ -94,6 +107,10 @@ public class SimpleDoHResolver extends SimpleDoTResolver {
         }
     }
 
+    /**
+     * AndroDNS is a debugging tool which should also allow querying a server without a trusted/valid certificate
+     * This method disables certificate verification
+     */
     public void trustAllCertificates() {
         try {
             TrustManager[] trustAllCerts = new TrustManager[]{
