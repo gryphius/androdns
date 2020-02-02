@@ -33,8 +33,6 @@ public class SessionStorage {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // verify
-        loadJSONStringFromFile(context, filename);
     }
 
     public static String loadJSONStringFromFile(Context context, String filename) {
@@ -50,7 +48,7 @@ public class SessionStorage {
             ex.printStackTrace();
             return null;
         }
-        Log.d("JSON",json);
+        //Log.d("JSON",json);
         return json;
     }
 
