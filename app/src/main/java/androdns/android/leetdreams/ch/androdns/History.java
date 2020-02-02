@@ -15,33 +15,18 @@ import java.util.Collections;
 
 public class History {
     private ArrayList<Session> historyvector = new ArrayList<Session>();
-    private static final String historyFile = "history.dat";
+    private static final String historyFile = "history.json";
     private Context context =null;
     public History(Context context){
         this.context = context;
     }
 
     public void save(){
-        try {
-            ObjectOutputStream out;
-            FileOutputStream fos = context.openFileOutput(historyFile, Context.MODE_PRIVATE);
-            out = new ObjectOutputStream(fos);
-            out.writeObject(historyvector);
-            out.close();
-        } catch(IOException e){
-            e.printStackTrace();;
-        }
+            SessionStorage.save(context,historyFile,historyvector);
     }
 
     public void load(){
-        ObjectInputStream in;
-        try {
-            in = new ObjectInputStream(context.openFileInput(historyFile));
-            historyvector=(ArrayList<Session>) in.readObject();
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        historyvector = SessionStorage.load(context,historyFile);
     }
 
     public void addEntry(Session s){
@@ -50,10 +35,7 @@ public class History {
     }
 
     public ArrayList<Session> getHistory(){
-        Session[] history = historyvector.toArray(new Session[historyvector.size()]);
-
         ArrayList<Session> copy = new ArrayList<>(historyvector);
-
         Collections.reverse(copy);
         return copy;
     }
