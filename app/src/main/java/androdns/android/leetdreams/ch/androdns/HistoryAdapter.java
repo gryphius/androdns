@@ -37,7 +37,7 @@ public class HistoryAdapter extends ArrayAdapter<Session> {
         Session session = values[position];
 
         TextView dateView = (TextView) rowView.findViewById(R.id.history_entry_date);
-        dateView.setText(getDate(session.runtimestamp, "yyyy-MM-dd hh:mm:ss"));
+        dateView.setText(getDate(session.answer.runtimestamp, "yyyy-MM-dd hh:mm:ss"));
 
         String qname = session.qname;
         if (!session.server.equals("")){

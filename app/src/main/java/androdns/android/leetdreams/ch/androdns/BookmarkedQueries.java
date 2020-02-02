@@ -26,58 +26,13 @@ public class BookmarkedQueries {
     }
 
     public void save() {
-        try {
-
-            FileOutputStream fos = context.openFileOutput(bookmarkFile, Context.MODE_PRIVATE);
-
-            JsonWriter writer = new JsonWriter(new OutputStreamWriter(fos, "UTF-8"));
-            writer.setIndent("  ");
-            writer.beginArray();
-            for (Session s : bookmarks) {
-                s.toJSON(writer);
-            }
-            writer.endArray();
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        SessionStorage.save(context, bookmarkFile,bookmarks);
     }
 
-    public String loadJSONStringFromFile() {
-        String json = null;
-        try {
-            InputStream is = context.openFileInput(bookmarkFile);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        return json;
-    }
 
     public void load() {
-        bookmarks.clear();
-        try {
-            JSONTokener tokener = new JSONTokener(loadJSONStringFromFile());
-            JSONArray jsa = new JSONArray(tokener);
-            for (int i = 0; i < jsa.length(); i++) {
-                JSONObject obj = jsa.getJSONObject(i);
-                Session s = new Session();
-                try {
-                    s.fromJSON(obj);
-                    bookmarks.add(s);
-                } catch (JSONException je) {
-                    je.printStackTrace();
-                }
-            }
+        bookmarks = SessionStorage.load(context, bookmarkFile);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         if(bookmarks.isEmpty()){
             bookmarks = getDefaultBookmarks();
         }

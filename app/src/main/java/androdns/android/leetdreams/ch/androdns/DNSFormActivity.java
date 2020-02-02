@@ -10,12 +10,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -26,8 +23,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -152,9 +147,12 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         Runnable guiUpdate = new Runnable() {
             @Override
             public void run() {
-                long runts = session.runtimestamp;
+                long runts = 0;
+                if (session.answer != null) {
+                    runts = session.answer.runtimestamp;
+                }
                 if (runts > 0) {
-                    setTitle(HistoryAdapter.getDate(session.runtimestamp, "yyyy-MM-dd hh:mm:ss"));
+                    setTitle(HistoryAdapter.getDate(session.answer.runtimestamp, "yyyy-MM-dd hh:mm:ss"));
                 } else {
                     setTitle("");
                 }
@@ -270,8 +268,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
      */
     public void doLookup(Session session) {
         activeSession = session;
-        session.runtimestamp = System.currentTimeMillis();
         AnswerScreenState answerState = new AnswerScreenState();
+        answerState.runtimestamp = System.currentTimeMillis();
         String answerOutput = "";
 
         try {
@@ -375,7 +373,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             }
             ((Button) findViewById(R.id.button)).clearAnimation();
             long duration = System.currentTimeMillis() - startTS;
-            session.duration = duration;
+            answerState.duration = duration;
             answerState.status = duration + " ms";
             answerState.asize = response.numBytes();
 

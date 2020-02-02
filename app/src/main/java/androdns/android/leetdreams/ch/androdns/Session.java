@@ -21,8 +21,6 @@ public class Session implements Serializable {
     public boolean flag_DO;
     public boolean TCP;
 
-    public long created;
-    public long runtimestamp;
 
     public AnswerScreenState answer;
 
@@ -58,7 +56,7 @@ public class Session implements Serializable {
     }
 
     public Session(){
-        created = System.currentTimeMillis();
+
     }
 
     public Session(String server, String qname, int qtype){
@@ -79,7 +77,6 @@ public class Session implements Serializable {
         this("",qname,qtype);
     }
 
-    public long duration;
 
     public void toJSON(JsonWriter writer) throws IOException {
         writer.beginObject();
@@ -93,6 +90,15 @@ public class Session implements Serializable {
         writer.name("flag_do").value(flag_DO);
         writer.name("tcp").value(TCP);
         writer.name("port").value(port);
+
+
+        writer.name("answer");
+        if(answer != null){
+            answer.toJSON(writer);
+        } else {
+            writer.nullValue();
+        }
+
         writer.endObject();
     }
 
@@ -110,6 +116,15 @@ public class Session implements Serializable {
             port = json.getInt("port");
         } catch(JSONException e){
             port = 0;
+        }
+        try {
+            JSONObject answerObject = json.getJSONObject("answer");
+            answer = new AnswerScreenState();
+            answer.fromJSON(answerObject);
+            this.answer = answer;
+
+        } catch (JSONException e){
+            answer = null;
         }
 
     }
