@@ -21,6 +21,8 @@ public class Session implements Serializable {
     public boolean flag_DO;
     public boolean TCP;
 
+    public String sessionName;
+    public String sessionDescription;
 
     public AnswerScreenState answer;
 
@@ -77,7 +79,12 @@ public class Session implements Serializable {
         this("",qname,qtype);
     }
 
-
+    public Session(String qname, int qtype, String name, String description){
+        this(qname,qtype);
+        this.sessionName = name;
+        this.sessionDescription = description;
+    }
+    
     public void toJSON(JsonWriter writer) throws IOException {
         writer.beginObject();
         writer.name("qname").value(qname);
@@ -90,7 +97,8 @@ public class Session implements Serializable {
         writer.name("flag_do").value(flag_DO);
         writer.name("tcp").value(TCP);
         writer.name("port").value(port);
-
+        writer.name("sessionName").value(sessionName);
+        writer.name("sessionDescription").value(sessionDescription);
 
         writer.name("answer");
         if(answer != null){
@@ -119,12 +127,19 @@ public class Session implements Serializable {
         }
         try {
             JSONObject answerObject = json.getJSONObject("answer");
-            answer = new AnswerScreenState();
+            AnswerScreenState loadanswer = new AnswerScreenState();
             answer.fromJSON(answerObject);
-            this.answer = answer;
+            this.answer = loadanswer;
 
         } catch (JSONException e){
             answer = null;
+        }
+
+        try{
+            sessionName = json.getString("sessionName");
+            sessionDescription = json.getString("sessionDescription");
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
     }
