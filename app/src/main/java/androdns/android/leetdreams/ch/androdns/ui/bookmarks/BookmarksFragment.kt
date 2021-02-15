@@ -21,7 +21,7 @@ class BookmarksFragment : Fragment() {
     ): View? {
         bookmarksViewModel =
                 ViewModelProvider(this).get(BookmarksViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_slideshow, container, false)
+        val root = inflater.inflate(R.layout.fragment_bookmarks, container, false)
         val textView: TextView = root.findViewById(R.id.text_slideshow)
         bookmarksViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
