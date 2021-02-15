@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/nav_query"
-        android:name="androdns.android.leetdreams.ch.androdns.ui.home.HomeFragment"
+        android:name="androdns.android.leetdreams.ch.androdns.ui.query.QueryFragment"
         android:label="@string/menu_query"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_history"
-        android:name="androdns.android.leetdreams.ch.androdns.ui.gallery.GalleryFragment"
+        android:name="androdns.android.leetdreams.ch.androdns.ui.history.HistoryFragment"
         android:label="@string/menu_history"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
         android:id="@+id/nav_bookmarks"
-        android:name="androdns.android.leetdreams.ch.androdns.ui.slideshow.SlideshowFragment"
+        android:name="androdns.android.leetdreams.ch.androdns.ui.bookmarks.BookmarksFragment"
         android:label="@string/menu_bookmarks"
         tools:layout="@layout/fragment_slideshow" />
 </navigation>
