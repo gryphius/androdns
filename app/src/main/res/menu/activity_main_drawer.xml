@@ -10,11 +10,11 @@
             android:title="@string/menu_query" />
         <item
             android:id="@+id/nav_history"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_history_24px"
             android:title="@string/menu_history" />
         <item
             android:id="@+id/nav_bookmarks"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_bookmarks_24px"
             android:title="@string/menu_bookmarks" />
     </group>
 </menu>
