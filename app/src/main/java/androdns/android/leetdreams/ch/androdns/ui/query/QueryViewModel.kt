@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 class QueryViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is the query Fragment"
+        value = "Query Name"
     }
     val text: LiveData<String> = _text
 }

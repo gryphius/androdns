@@ -22,7 +22,7 @@ class QueryFragment : Fragment() {
         queryViewModel =
                 ViewModelProvider(this).get(QueryViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_query, container, false)
-        val textView: TextView = root.findViewById(R.id.text_home)
+        val textView: TextView = root.findViewById(R.id.text_query_name)
         queryViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
