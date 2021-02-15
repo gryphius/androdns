@@ -6,19 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".ui.query.QueryFragment">
 
-    <TextView
-        android:id="@+id/text_query_name"
+
+    <fragment
+        android:id="@+id/fragment_query_view_setup"
+        android:name="androdns.android.leetdreams.ch.androdns.ui.QuerySetupFragment"
+        android:layout_width="401dp"
+        android:layout_height="296dp"
+        tools:layout_editor_absoluteX="3dp"
+        tools:layout_editor_absoluteY="5dp" />
+
+    <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_query_view_setup"
+        tools:layout_editor_absoluteX="1dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

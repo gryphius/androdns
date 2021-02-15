@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TransportSetupFragment">
+
+    <EditText
+        android:id="@+id/editTextServerName"
+        android:layout_width="386dp"
+        android:layout_height="81dp"
+        android:layout_marginTop="17dp"
+        android:ems="10"
+        android:hint="Server hostname or DOH URI"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="@+id/textViewtitleHostname"
+        app:layout_constraintTop_toBottomOf="@+id/textViewtitleHostname" />
+
+    <TextView
+        android:id="@+id/textViewtitleHostname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Server Hostname / URI. Empty to auto-detect resolver."
+        tools:layout_editor_absoluteX="11dp"
+        tools:layout_editor_absoluteY="9dp" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="384dp"
+        android:layout_height="193dp"
+        app:layout_constraintStart_toStartOf="@+id/editTextServerName"
+        app:layout_constraintTop_toBottomOf="@+id/editTextServerName">
+
+        <RadioButton
+            android:id="@+id/radioButtonTransportPlainUDP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Plain DNS over UDP" />
+
+        <RadioButton
+            android:id="@+id/radioButtonTransportPlainTCP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Plain DNS over TCP" />
+
+        <RadioButton
+            android:id="@+id/radioButtonTransportDoT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DNS-over-TLS" />
+
+        <RadioButton
+            android:id="@+id/radioButtonTransportDoH"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DNS-over-HTTPS" />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Port"
+        app:layout_constraintStart_toStartOf="@+id/radioGroup"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+
+    <EditText
+        android:id="@+id/editTextNumber"
+        android:layout_width="383dp"
+        android:layout_height="43dp"
+        android:ems="10"
+        android:hint="Port number, empty to use protocol default"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+</androidx.constraintlayout.widget.ConstraintLayout>

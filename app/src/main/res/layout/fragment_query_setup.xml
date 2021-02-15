@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.QuerySetupFragment">
+
+    <EditText
+        android:id="@+id/editText_QueryFragment_QNAME"
+        android:layout_width="375dp"
+        android:layout_height="50dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="example.com"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/txtQNAME"
+        app:layout_constraintTop_toBottomOf="@+id/txtQNAME" />
+
+    <TextView
+        android:id="@+id/txtQNAME"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="QNAME"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="16dp" />
+
+    <TextView
+        android:id="@+id/textViewTypeClass"
+        android:layout_width="203dp"
+        android:layout_height="27dp"
+        android:layout_marginTop="30dp"
+        android:text="IN A"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonTypeClass"
+        app:layout_constraintStart_toStartOf="@+id/editText_QueryFragment_QNAME"
+        app:layout_constraintTop_toBottomOf="@+id/editText_QueryFragment_QNAME"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/buttonTypeClass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Type / Class"
+        app:layout_constraintEnd_toEndOf="@+id/editText_QueryFragment_QNAME"
+        app:layout_constraintTop_toBottomOf="@+id/editText_QueryFragment_QNAME" />
+
+    <TextView
+        android:id="@+id/textViewTransport"
+        android:layout_width="202dp"
+        android:layout_height="31dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="1dp"
+        android:text="plain DNS/UDP Port 53"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonTransport"
+        app:layout_constraintEnd_toEndOf="@+id/textViewTypeClass"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/textViewTypeClass"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTypeClass"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/buttonTransport"
+        android:layout_width="141dp"
+        android:layout_height="44dp"
+        android:text="Transport"
+        app:layout_constraintEnd_toEndOf="@+id/buttonTypeClass"
+        app:layout_constraintStart_toStartOf="@+id/buttonTypeClass"
+        app:layout_constraintTop_toBottomOf="@+id/buttonTypeClass" />
+
+    <TextView
+        android:id="@+id/textViewFlagsEDNS"
+        android:layout_width="202dp"
+        android:layout_height="29dp"
+        android:layout_marginTop="8dp"
+        android:text="RD"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonFlagsEDNS"
+        app:layout_constraintEnd_toEndOf="@+id/textViewTransport"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/textViewTransport"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTransport"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/buttonFlagsEDNS"
+        android:layout_width="141dp"
+        android:layout_height="44dp"
+        android:text="Flags / EDNS"
+        app:layout_constraintEnd_toEndOf="@+id/buttonTransport"
+        app:layout_constraintStart_toStartOf="@+id/buttonTransport"
+        app:layout_constraintTop_toBottomOf="@+id/buttonTransport" />
+
+    <Button
+        android:id="@+id/buttonQuery"
+        android:layout_width="379dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="10dp"
+        android:text="Query"
+        app:layout_constraintEnd_toEndOf="@+id/buttonFlagsEDNS"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFlagsEDNS" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
