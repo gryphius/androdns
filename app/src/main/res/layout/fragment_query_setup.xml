@@ -90,14 +90,5 @@
         app:layout_constraintStart_toStartOf="@+id/buttonTransport"
         app:layout_constraintTop_toBottomOf="@+id/buttonTransport" />
 
-    <Button
-        android:id="@+id/buttonQuery"
-        android:layout_width="379dp"
-        android:layout_height="37dp"
-        android:layout_marginTop="10dp"
-        android:text="Query"
-        app:layout_constraintEnd_toEndOf="@+id/buttonFlagsEDNS"
-        app:layout_constraintTop_toBottomOf="@+id/textViewFlagsEDNS" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
