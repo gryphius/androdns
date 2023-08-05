@@ -13,6 +13,7 @@
         <activity android:name=".HelpActivity"></activity>
         <activity
             android:name=".DNSFormActivity"
+            android:exported="true"
             android:windowSoftInputMode="stateUnchanged|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
