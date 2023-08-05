@@ -11,7 +11,7 @@ android:layout_height="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/history_entry_date"
     />
-<android.support.v4.widget.Space
+<androidx.legacy.widget.Space
     android:layout_width="2dp"
     android:layout_height="2dp" />
     <TextView
@@ -20,7 +20,7 @@ android:layout_height="wrap_content"
         android:id="@+id/history_qname"
         android:textStyle="bold"
         />
-    <android.support.v4.widget.Space
+    <androidx.legacy.widget.Space
         android:layout_width="2dp"
         android:layout_height="2dp" />
     <TextView
@@ -29,7 +29,7 @@ android:layout_height="wrap_content"
         android:id="@+id/history_qtype"
         android:textStyle="bold"
         />
-    <android.support.v4.widget.Space
+    <androidx.legacy.widget.Space
         android:layout_width="2dp"
         android:layout_height="2dp" />
     <TextView

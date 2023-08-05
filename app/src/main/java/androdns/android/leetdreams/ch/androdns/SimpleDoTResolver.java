@@ -7,8 +7,10 @@ package androdns.android.leetdreams.ch.androdns;
 
 
 
+
 import android.util.Log;
 
+import org.xbill.DNS.EDNSOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
 import org.xbill.DNS.Message;
@@ -30,6 +32,7 @@ import org.xbill.DNS.ZoneTransferIn;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.*;
 import java.io.*;
 import java.net.*;
@@ -50,7 +53,7 @@ import javax.net.ssl.X509TrustManager;
  */
 
 
-public class SimpleDoTResolver implements Resolver {
+public class SimpleDoTResolver implements Resolver  {
     protected int CONNECT_READ_TIMEOUT=5000;
 
     /** The default port to send queries to */
@@ -64,7 +67,7 @@ public class SimpleDoTResolver implements Resolver {
     private boolean useTCP, ignoreTruncation;
     private OPTRecord queryOPT;
     private TSIG tsig;
-    private long timeoutValue = 10 * 1000;
+    private Duration timeoutValue;
 
     private static final short DEFAULT_UDPSIZE = 512;
 
@@ -82,7 +85,7 @@ public class SimpleDoTResolver implements Resolver {
 
     public SimpleDoTResolver(String hostname, int port)throws UnknownHostException{
         if (hostname == null) {
-            hostname = ResolverConfig.getCurrentConfig().server();
+            hostname = ResolverConfig.getCurrentConfig().server().toString();
             if (hostname == null)
                 hostname = defaultResolver;
         }
@@ -175,7 +178,7 @@ public class SimpleDoTResolver implements Resolver {
     }
 
     public void
-    setEDNS(int level, int payloadSize, int flags, List options) {
+    setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options) {
         if (level != 0 && level != -1)
             throw new IllegalArgumentException("invalid EDNS level - " +
                     "must be 0 or -1");
@@ -186,7 +189,7 @@ public class SimpleDoTResolver implements Resolver {
 
     public void
     setEDNS(int level) {
-        setEDNS(level, 0, 0, null);
+        setEDNS(level, 0, 0, (List<EDNSOption>) null);
     }
 
     public void
@@ -199,20 +202,6 @@ public class SimpleDoTResolver implements Resolver {
         return tsig;
     }
 
-    public void
-    setTimeout(int secs, int msecs) {
-        timeoutValue = (long)secs * 1000 + msecs;
-    }
-
-    public void
-    setTimeout(int secs) {
-        setTimeout(secs, 0);
-    }
-
-    long
-    getTimeout() {
-        return timeoutValue;
-    }
 
     private Message
     parseMessage(byte [] b) throws WireParseException {
@@ -283,7 +272,7 @@ public class SimpleDoTResolver implements Resolver {
 
 
 
-        long endTime = System.currentTimeMillis() + timeoutValue;
+        long endTime = System.currentTimeMillis() + timeoutValue.toMillis();
         byte[] in = sendAndReceive(query);
 
 		/*
@@ -387,7 +376,7 @@ public class SimpleDoTResolver implements Resolver {
     sendAXFR(Message query) throws IOException {
         Name qname = query.getQuestion().getName();
         ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, address, tsig);
-        xfrin.setTimeout((int)(getTimeout() / 1000));
+        xfrin.setTimeout(getTimeout());
         xfrin.setLocalAddress(localAddress);
         try {
             xfrin.run();
@@ -406,4 +395,8 @@ public class SimpleDoTResolver implements Resolver {
         return response;
     }
 
+    @Override
+    public void setTimeout(Duration timeout) {
+        timeoutValue = timeout;
+    }
 }

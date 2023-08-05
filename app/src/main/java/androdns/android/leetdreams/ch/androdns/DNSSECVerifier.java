@@ -9,12 +9,11 @@ import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
 
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.List;
 
 public class DNSSECVerifier {
-    private Hashtable<String,DNSKEYRecord> knownDNSKeys = new Hashtable<String,DNSKEYRecord>();
+    private final Hashtable<String,DNSKEYRecord> knownDNSKeys = new Hashtable<>();
     private static final String TAG="DNSSECVerifier";
 
     public void verifySignature(RRset rrset, RRSIGRecord rrsig) throws DNSSEC.DNSSECException,DNSKEYUnavailableException {
@@ -53,23 +52,19 @@ public class DNSSECVerifier {
         Log.d(TAG,"learned DNSKEY  "+hskey(dnskey));
     }
 
-    public String verificationStatusString(RRset[] rrsets){
-        StringBuffer buf = new StringBuffer();
+    public String verificationStatusString(List<RRset> rrsets){
+        StringBuilder buf = new StringBuilder();
         for(RRset rrset:rrsets) {
-            Iterator<RRSIGRecord> sigs = rrset.sigs();
-
-            while (sigs.hasNext()) {
-                RRSIGRecord rrsig = sigs.next();
-                int keyID = rrsig.getFootprint();
-                buf.append(keyID);
+            for(RRSIGRecord sig:rrset.sigs()){
+                buf.append(sig.getFootprint());
                 buf.append("/");
-                buf.append(rrsig.getSigner().toString());
+                buf.append(sig.getSigner().toString());
                 buf.append(":");
                 buf.append(Type.string(rrset.getType()));
 
                 buf.append("=");
                 try {
-                    this.verifySignature(rrset, rrsig);
+                    this.verifySignature(rrset, sig);
                     buf.append("verified");
                 } catch (DNSKEYUnavailableException dku) {
                     buf.append("have to learn DNSKEY");
@@ -92,20 +87,16 @@ public class DNSSECVerifier {
         return validationStatus;
     }
 
-    public void learnDNSSECKeysFromRRSETs(RRset[] rrsets){
-        Iterator it;
-        int i;
+    public void learnDNSSECKeysFromRRSETs(List<RRset> rrsets){
+        DNSKEYRecord dnskey;
 
-        for (i = 0; i < rrsets.length; i++) {
-            RRset rrset = rrsets[i];
+        for (RRset rrset:rrsets) {
             if (rrset.getType()!=Type.DNSKEY){
                 continue;
             }
-            it = rrset.rrs();
-
-            while (it.hasNext()) {
-                DNSKEYRecord r = (DNSKEYRecord) it.next();
-                addDNSKEY(r);
+            for(Record r:rrset.rrs()){
+                dnskey = (DNSKEYRecord) r;
+                addDNSKEY(dnskey);
             }
 
 

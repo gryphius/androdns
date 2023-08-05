@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +33,7 @@ import org.xbill.DNS.Header;
 import org.xbill.DNS.InvalidTypeException;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.RRSIGRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
@@ -331,7 +332,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             }
 
             if (session.flag_DO) {
-                resolver.setEDNS(0, 0, Flags.DO, null);
+                resolver.setEDNS(0, 0, Flags.DO);
             }
 
             resolver.setTCP(session.TCP);
@@ -523,7 +524,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     public String hostToAddr(String hostname) {
         if (hostname == null || hostname == "") {
-            hostname = ResolverConfig.getCurrentConfig().server();
+            hostname = ResolverConfig.getCurrentConfig().server().toString();
             if (hostname == null) {
                 hostname = "0";
             }
@@ -551,30 +552,22 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         state.flag_CD = header.getFlag(Flags.CD);
     }
 
-    public String rrSetsToString(RRset[] rrsets) {
+    public String rrSetsToString(List<RRset> rrsets) {
         StringBuffer ansBuffer = new StringBuffer();
         Iterator it;
         int i;
 
-        for (i = 0; i < rrsets.length; i++) {
-            RRset rrset = rrsets[i];
-            it = rrset.rrs();
-
-            while (it.hasNext()) {
-                Record r = (Record) it.next();
-                //Log.i(TAG, "rrsetstostring: type=" + r.getType());
+        for (RRset rrset : rrsets) {
+            for (Record r : rrset.rrs()) {
                 ansBuffer.append(r.toString());
                 ansBuffer.append("\n");
             }
 
             //RRSIGs
-            final Iterator<Record> sigIter = rrset.sigs();
-            while (sigIter.hasNext()) {
-                final Record sigRec = sigIter.next();
-
+            for (RRSIGRecord sigRec : rrset.sigs())
                 ansBuffer.append(sigRec.toString());
-                ansBuffer.append("\n");
-            }
+            ansBuffer.append("\n");
+
         }
         //replace tabs
         String ret = ansBuffer.toString().replace('\t', ' ');
