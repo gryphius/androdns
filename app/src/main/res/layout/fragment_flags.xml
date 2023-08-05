@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TransportSetupFragment">
+
+    <TextView
+        android:id="@+id/tfDO"
+        android:layout_width="234dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text='Set "DNSSEC OK" Flag'
+        app:layout_constraintStart_toEndOf="@+id/cbDO"
+        app:layout_constraintTop_toBottomOf="@+id/tfCD" />
+
+    <TextView
+        android:id="@+id/tfCD"
+        android:layout_width="240dp"
+        android:layout_height="32dp"
+        android:text='Set "Check Disabled" Flag'
+        app:layout_constraintStart_toEndOf="@+id/cbCD"
+        app:layout_constraintTop_toBottomOf="@+id/tfRD" />
+
+    <CheckBox
+        android:id="@+id/cbRD"
+        android:layout_width="56dp"
+        android:layout_height="32dp"
+        android:text="RD"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <CheckBox
+        android:id="@+id/cbCD"
+        android:layout_width="55dp"
+        android:layout_height="35dp"
+        android:checked="false"
+        android:text="CD"
+        app:layout_constraintTop_toBottomOf="@+id/cbRD"
+        tools:layout_editor_absoluteX="15dp" />
+
+    <CheckBox
+        android:id="@+id/cbDO"
+        android:layout_width="56dp"
+        android:layout_height="34dp"
+        android:text="DO"
+        app:layout_constraintTop_toBottomOf="@+id/cbCD"
+        tools:layout_editor_absoluteX="14dp" />
+
+    <TextView
+        android:id="@+id/tfRD"
+        android:layout_width="239dp"
+        android:layout_height="32dp"
+        android:text='Set "Recursion Desired" Flag'
+        app:layout_constraintStart_toEndOf="@+id/cbRD"
+        tools:layout_editor_absoluteY="16dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

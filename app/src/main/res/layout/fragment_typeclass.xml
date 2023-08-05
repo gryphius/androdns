@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TransportSetupFragment">
+
+    <EditText
+        android:id="@+id/etCustomType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number"
+        app:layout_constraintStart_toEndOf="@+id/tfCustomType"
+        tools:layout_editor_absoluteY="111dp" />
+
+    <TextView
+        android:id="@+id/tfCustomType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Custom Type:"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="125dp" />
+
+    <Spinner
+        android:id="@+id/spinnerRecordType"
+        android:layout_width="409dp"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="94dp" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteX="39dp"
+        tools:layout_editor_absoluteY="189dp">
+
+        <RadioButton
+            android:id="@+id/rbIN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IN  (INTERNET CLASS)"
+            android:checked="true"
+            />
+
+        <RadioButton
+            android:id="@+id/rbCH"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CH (CHAOS CLASS)" />
+
+        <RadioButton
+            android:id="@+id/rbHS"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="HS (HESIOD CLASS)" />
+    </RadioGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
