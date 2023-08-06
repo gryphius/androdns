@@ -115,7 +115,7 @@ public class Session implements Serializable {
         flag_RD = json.getBoolean("flag_rd");
         flag_CD = json.getBoolean("flag_cd");
         flag_DO = json.getBoolean("flag_do");
-        validateDNSSEC = json.getBoolean("validate");
+
         TCP = json.getBoolean("tcp");
         try {
             port = json.getInt("port");
@@ -130,6 +130,12 @@ public class Session implements Serializable {
 
         } catch (JSONException e){
             answer = null;
+        }
+
+        try{
+            validateDNSSEC = json.getBoolean("validate");
+        } catch (JSONException e){
+            validateDNSSEC = false;
         }
 
     }
