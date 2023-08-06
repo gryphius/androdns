@@ -93,13 +93,13 @@
                 style="@style/TextAppearance.AppCompat.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="DNSSEC"
+                android:text="Local DNSSEC validation"
                 />
             <TextView
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="If the DO bit is set, the app will try to validate RRSIGS against known DNSKEYs. It does not start any DNS queries by itself, so the user has to query DNSKEY of a domain before signatures can be validated."
+                android:text="fetches additional required dnssec records to validate answers. Sets the AD bit on success or a extended dns error message in the response on failure. Unavailable with the DoT resolver unfortunately."
                 />
             <TextView
                 style="@style/TextAppearance.AppCompat.Caption"

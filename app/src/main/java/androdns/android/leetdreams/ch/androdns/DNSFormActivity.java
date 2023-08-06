@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,11 +28,13 @@ import android.widget.TextView;
 
 
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.DohResolver;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
 import org.xbill.DNS.InvalidTypeException;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.RRSIGRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
@@ -42,23 +44,27 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.dnssec.ValidatingResolver;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.IDN;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnFocusChangeListener {
     private static final String TAG = "AndroDNS";
     private Session activeSession = null;
     private History history;
     private BookmarkedQueries bookmarks;
-    private DNSSECVerifier dnssecVerifier = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,12 +97,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         return true;
     }
 
-    public DNSSECVerifier getDnssecVerifier() {
-        if (dnssecVerifier == null) {
-            dnssecVerifier = new DNSSECVerifier();
-        }
-        return dnssecVerifier;
-    }
+
 
     /**
      * update the the lower gui section with the Values from an AnswerScreenState
@@ -320,7 +321,12 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
 
             } else if (session.protocol.equalsIgnoreCase("DoH")) {
-                resolver = new SimpleDoHResolver(hostnameArg);
+                new Certificatetruster().trustAllCertificates();
+                String dohurl = hostnameArg;
+                if(!dohurl.toLowerCase().startsWith("http")){
+                    dohurl="https://"+dohurl;
+                }
+                resolver = new DohResolver(dohurl);
             } else {
                 resolver = new SimpleResolver(hostnameArg);
                 try {
@@ -331,7 +337,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             }
 
             if (session.flag_DO) {
-                resolver.setEDNS(0, 0, Flags.DO, null);
+                resolver.setEDNS(0, 0, Flags.DO);
             }
 
             resolver.setTCP(session.TCP);
@@ -366,7 +372,30 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             Message response = null;
             long startTS = System.currentTimeMillis();
             setStatusText("query sent");
-            response = resolver.send(query);
+
+
+            // use local validating resolver
+            // unfortunately, the dot resolver can't handle async stuff yet
+            if(  session.validateDNSSEC && !session.protocol.equalsIgnoreCase("DoT")){
+                // TODO: we're most likely going to forget to update this when the root keys rolls next time.
+                final String ROOT_DS = ". IN DS 20326 8 2 E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D";
+
+                ValidatingResolver vr = new ValidatingResolver(resolver);
+                vr.loadTrustAnchors(new ByteArrayInputStream(ROOT_DS.getBytes(StandardCharsets.US_ASCII)));
+                response = vr.sendAsync(query)
+                        .whenComplete(
+                                (answer, ex) -> {
+                                    if (ex == null) {
+                                        System.out.println(answer);
+                                    } else {
+                                        ex.printStackTrace();
+                                    }
+                                })
+                        .toCompletableFuture()
+                        .get();
+            } else {
+                response = resolver.send(query);
+            }
 
             if (activeSession != session) {
                 return; // this query has been aborted/overwritten by a new one
@@ -395,18 +424,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             ansBuffer.append("ADDITIONAL SECTION:\n");
             ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
 
-            // DNSSSEC validation
-            DNSSECVerifier verifier = getDnssecVerifier();
-            verifier.learnDNSSECKeysFromRRSETs(response.getSectionRRsets(Section.ANSWER));
-
-            if (session.flag_DO) {
-                ansBuffer.append("\nvalidation status :\n");
-                ansBuffer.append(verifier.verificationStatusString(response.getSectionRRsets(Section.ANSWER)));
-                ansBuffer.append(verifier.verificationStatusString(response.getSectionRRsets(Section.AUTHORITY)));
-                ansBuffer.append("\n");
-            }
-
-
             answerOutput = ansBuffer.toString();
         } catch (TextParseException e) {
             if (activeSession == session) {
@@ -433,6 +450,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         } catch (InvalidTypeException e) {
             answerOutput = "Invalid type";
             answerState.status = "INVALID";
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         session.answer = answerState;
         answerState.answerText = answerOutput;
@@ -460,6 +481,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         screenSession.server = gettxtResolverContent().trim();
         screenSession.TCP = ((CheckBox) findViewById(R.id.cbTCP)).isChecked();
         screenSession.protocol = (((Spinner) findViewById(R.id.spinnerProto))).getSelectedItem().toString();
+        screenSession.validateDNSSEC =  ((CheckBox) findViewById(R.id.cbLocalValidation)).isChecked();
         try {
             screenSession.port = gettxtPortContent();
         } catch (Exception e) {
@@ -523,7 +545,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
     public String hostToAddr(String hostname) {
         if (hostname == null || hostname == "") {
-            hostname = ResolverConfig.getCurrentConfig().server();
+            hostname = ResolverConfig.getCurrentConfig().server().toString();
             if (hostname == null) {
                 hostname = "0";
             }
@@ -551,30 +573,22 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         state.flag_CD = header.getFlag(Flags.CD);
     }
 
-    public String rrSetsToString(RRset[] rrsets) {
+    public String rrSetsToString(List<RRset> rrsets) {
         StringBuffer ansBuffer = new StringBuffer();
         Iterator it;
         int i;
 
-        for (i = 0; i < rrsets.length; i++) {
-            RRset rrset = rrsets[i];
-            it = rrset.rrs();
-
-            while (it.hasNext()) {
-                Record r = (Record) it.next();
-                //Log.i(TAG, "rrsetstostring: type=" + r.getType());
+        for (RRset rrset : rrsets) {
+            for (Record r : rrset.rrs()) {
                 ansBuffer.append(r.toString());
                 ansBuffer.append("\n");
             }
 
             //RRSIGs
-            final Iterator<Record> sigIter = rrset.sigs();
-            while (sigIter.hasNext()) {
-                final Record sigRec = sigIter.next();
-
+            for (RRSIGRecord sigRec : rrset.sigs())
                 ansBuffer.append(sigRec.toString());
-                ansBuffer.append("\n");
-            }
+            ansBuffer.append("\n");
+
         }
         //replace tabs
         String ret = ansBuffer.toString().replace('\t', ' ');
@@ -718,6 +732,17 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             } else {
                 tcpCheckbox.setEnabled(true);
             }
+
+            // DOT resolver cant handle the async stuff and will crash with validation
+            CheckBox validateCheckbox = (CheckBox) findViewById(R.id.cbLocalValidation);
+            if(proto.equalsIgnoreCase("DoT")){
+                validateCheckbox.setEnabled(false);
+                validateCheckbox.setText("Local DNSSEC validation (not available over DoT)");
+            } else {
+                validateCheckbox.setEnabled(true);
+                validateCheckbox.setText("Local DNSSEC validation (sets AD bit or EDE)");
+            }
+
 
             setDefaultPortFromProto();
 

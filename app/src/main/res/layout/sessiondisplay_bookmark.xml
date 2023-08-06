@@ -5,7 +5,7 @@ android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:orientation="horizontal"
     >
-<android.support.v4.widget.Space
+<android.widget.Space
     android:layout_width="2dp"
     android:layout_height="2dp" />
     <TextView
@@ -14,7 +14,7 @@ android:layout_height="wrap_content"
         android:id="@+id/bookmarked_qname"
         android:textStyle="bold"
         />
-    <android.support.v4.widget.Space
+    <android.widget.Space
         android:layout_width="2dp"
         android:layout_height="2dp" />
     <TextView
@@ -23,7 +23,7 @@ android:layout_height="wrap_content"
         android:id="@+id/bookmarked_qtype"
         android:textStyle="bold"
         />
-    <android.support.v4.widget.Space
+    <android.widget.Space
         android:layout_width="2dp"
         android:layout_height="2dp" />
     <TextView
