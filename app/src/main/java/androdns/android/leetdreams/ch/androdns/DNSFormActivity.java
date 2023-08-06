@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.DohResolver;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
 import org.xbill.DNS.InvalidTypeException;
@@ -321,7 +322,12 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
 
             } else if (session.protocol.equalsIgnoreCase("DoH")) {
-                resolver = new SimpleDoHResolver(hostnameArg);
+                new Certificatetruster().trustAllCertificates();
+                String dohurl = hostnameArg;
+                if(!dohurl.toLowerCase().startsWith("http")){
+                    dohurl="https://"+dohurl;
+                }
+                resolver = new DohResolver(dohurl);
             } else {
                 resolver = new SimpleResolver(hostnameArg);
                 try {
