@@ -182,6 +182,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
                 ((CheckBox) findViewById(R.id.cbCD)).setChecked(session.flag_CD);
                 ((CheckBox) findViewById(R.id.cbRD)).setChecked(session.flag_RD);
                 ((CheckBox) findViewById(R.id.cbDO)).setChecked(session.flag_DO);
+                ((CheckBox) findViewById(R.id.cbLocalValidation)).setChecked(session.validateDNSSEC);
 
                 int port = session.port;
                 if (port != 0) {
