@@ -735,7 +735,14 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
             // DOT resolver cant handle the async stuff and will crash with validation
             CheckBox validateCheckbox = (CheckBox) findViewById(R.id.cbLocalValidation);
-            validateCheckbox.setEnabled(!proto.equalsIgnoreCase("DoT"));
+            if(proto.equalsIgnoreCase("DoT")){
+                validateCheckbox.setEnabled(false);
+                validateCheckbox.setText("Local DNSSEC validation (not available over DoT)");
+            } else {
+                validateCheckbox.setEnabled(true);
+                validateCheckbox.setText("Local DNSSEC validation (sets AD bit or EDE)");
+            }
+
 
             setDefaultPortFromProto();
 
