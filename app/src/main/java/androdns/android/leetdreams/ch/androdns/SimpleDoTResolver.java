@@ -60,14 +60,14 @@ public class SimpleDoTResolver implements Resolver  {
     public static final int DEFAULT_DOT_PORT = 853;
 
     /** The default EDNS payload size */
-    public static final int DEFAULT_EDNS_PAYLOADSIZE = 1280;
+    public static final int DEFAULT_EDNS_PAYLOADSIZE = 1232;
 
     protected InetSocketAddress address;
     private InetSocketAddress localAddress;
     private boolean useTCP, ignoreTruncation;
     private OPTRecord queryOPT;
     private TSIG tsig;
-    private Duration timeoutValue;
+    private Duration timeoutValue = Duration.ofSeconds(5);
 
     private static final short DEFAULT_UDPSIZE = 512;
 
@@ -357,20 +357,7 @@ public class SimpleDoTResolver implements Resolver  {
         return in;
     }
 
-    /**
-     * Asynchronously sends a message to a single server, registering a listener
-     * to receive a callback on success or exception.  Multiple asynchronous
-     * lookups can be performed in parallel.  Since the callback may be invoked
-     * before the function returns, external synchronization is necessary.
-     * @param query The query to send
-     * @param listener The object containing the callbacks.
-     * @return An identifier, which is also a parameter in the callback
-     */
-    public Object
-    sendAsync(final Message query, final ResolverListener listener) {
-        //not implemented
-       return null;
-    }
+
 
     private Message
     sendAXFR(Message query) throws IOException {
