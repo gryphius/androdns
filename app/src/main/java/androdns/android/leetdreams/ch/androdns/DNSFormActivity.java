@@ -375,7 +375,8 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
 
 
             // use local validating resolver
-            if(session.validateDNSSEC ){
+            // unfortunately, the dot resolver can't handle async stuff yet
+            if(  session.validateDNSSEC && !session.protocol.equalsIgnoreCase("DoT")){
                 // TODO: we're most likely going to forget to update this when the root keys rolls next time.
                 final String ROOT_DS = ". IN DS 20326 8 2 E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D";
 
@@ -731,6 +732,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             } else {
                 tcpCheckbox.setEnabled(true);
             }
+
+            // DOT resolver cant handle the async stuff and will crash with validation
+            CheckBox validateCheckbox = (CheckBox) findViewById(R.id.cbLocalValidation);
+            validateCheckbox.setEnabled(!proto.equalsIgnoreCase("DoT"));
 
             setDefaultPortFromProto();
 
