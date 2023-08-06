@@ -44,23 +44,27 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.dnssec.ValidatingResolver;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.IDN;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class DNSFormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnFocusChangeListener {
     private static final String TAG = "AndroDNS";
     private Session activeSession = null;
     private History history;
     private BookmarkedQueries bookmarks;
-    private DNSSECVerifier dnssecVerifier = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,12 +97,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         return true;
     }
 
-    public DNSSECVerifier getDnssecVerifier() {
-        if (dnssecVerifier == null) {
-            dnssecVerifier = new DNSSECVerifier();
-        }
-        return dnssecVerifier;
-    }
+
 
     /**
      * update the the lower gui section with the Values from an AnswerScreenState
@@ -373,7 +372,29 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             Message response = null;
             long startTS = System.currentTimeMillis();
             setStatusText("query sent");
-            response = resolver.send(query);
+
+
+            // use local validating resolver
+            if(session.validateDNSSEC ){
+                // TODO: we're most likely going to forget to update this when the root keys rolls next time.
+                final String ROOT_DS = ". IN DS 20326 8 2 E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D";
+
+                ValidatingResolver vr = new ValidatingResolver(resolver);
+                vr.loadTrustAnchors(new ByteArrayInputStream(ROOT_DS.getBytes(StandardCharsets.US_ASCII)));
+                response = vr.sendAsync(query)
+                        .whenComplete(
+                                (answer, ex) -> {
+                                    if (ex == null) {
+                                        System.out.println(answer);
+                                    } else {
+                                        ex.printStackTrace();
+                                    }
+                                })
+                        .toCompletableFuture()
+                        .get();
+            } else {
+                response = resolver.send(query);
+            }
 
             if (activeSession != session) {
                 return; // this query has been aborted/overwritten by a new one
@@ -402,18 +423,6 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
             ansBuffer.append("ADDITIONAL SECTION:\n");
             ansBuffer.append(rrSetsToString(response.getSectionRRsets(Section.ADDITIONAL)));
 
-            // DNSSSEC validation
-            DNSSECVerifier verifier = getDnssecVerifier();
-            verifier.learnDNSSECKeysFromRRSETs(response.getSectionRRsets(Section.ANSWER));
-
-            if (session.flag_DO) {
-                ansBuffer.append("\nvalidation status :\n");
-                ansBuffer.append(verifier.verificationStatusString(response.getSectionRRsets(Section.ANSWER)));
-                ansBuffer.append(verifier.verificationStatusString(response.getSectionRRsets(Section.AUTHORITY)));
-                ansBuffer.append("\n");
-            }
-
-
             answerOutput = ansBuffer.toString();
         } catch (TextParseException e) {
             if (activeSession == session) {
@@ -440,6 +449,10 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         } catch (InvalidTypeException e) {
             answerOutput = "Invalid type";
             answerState.status = "INVALID";
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         session.answer = answerState;
         answerState.answerText = answerOutput;
@@ -467,6 +480,7 @@ public class DNSFormActivity extends AppCompatActivity implements AdapterView.On
         screenSession.server = gettxtResolverContent().trim();
         screenSession.TCP = ((CheckBox) findViewById(R.id.cbTCP)).isChecked();
         screenSession.protocol = (((Spinner) findViewById(R.id.spinnerProto))).getSelectedItem().toString();
+        screenSession.validateDNSSEC =  ((CheckBox) findViewById(R.id.cbLocalValidation)).isChecked();
         try {
             screenSession.port = gettxtPortContent();
         } catch (Exception e) {

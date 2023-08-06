@@ -21,6 +21,7 @@ public class Session implements Serializable {
     public boolean flag_DO;
     public boolean TCP;
 
+    public boolean validateDNSSEC;
 
     public AnswerScreenState answer;
 
@@ -52,6 +53,7 @@ public class Session implements Serializable {
                 && other.flag_DO == this.flag_DO
                 && other.TCP == this.TCP
                 && other.port == this.port
+                && other.validateDNSSEC == this.validateDNSSEC
         );
     }
 
@@ -71,6 +73,7 @@ public class Session implements Serializable {
         this.flag_DO=false;
         this.TCP = false;
         this.port = 0;
+        this.validateDNSSEC = false;
     }
 
     public Session(String qname, int qtype){
@@ -90,6 +93,7 @@ public class Session implements Serializable {
         writer.name("flag_do").value(flag_DO);
         writer.name("tcp").value(TCP);
         writer.name("port").value(port);
+        writer.name("validate").value(validateDNSSEC);
 
 
         writer.name("answer");
@@ -111,6 +115,7 @@ public class Session implements Serializable {
         flag_RD = json.getBoolean("flag_rd");
         flag_CD = json.getBoolean("flag_cd");
         flag_DO = json.getBoolean("flag_do");
+        validateDNSSEC = json.getBoolean("validate");
         TCP = json.getBoolean("tcp");
         try {
             port = json.getInt("port");
